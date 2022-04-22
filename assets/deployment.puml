@@ -1,0 +1,56 @@
+@startuml
+actor User
+component "PC" as PC
+component "LoRaWAN Radio" as Mote
+component "Raspberry Pi\n(USB host)" as Pi
+component Usb1 [
+  USB-to-RJ45
+  Converter #1
+]
+component Usb2 [
+  USB-to-RJ45
+  Converter #2
+]
+component UsbN [
+  USB-to-RJ45
+  Converter #N
+]
+component "Router #1" as Router1
+component "Router #2" as Router2
+component "Router #N" as RouterN
+node "The Things Network" as TTN
+cloud "LoRaWAN" as LoRaWAN #skyblue
+cloud "bridge.py (this program)" as bridge #gold
+cloud "user-app" as UserApp #gold
+
+User -> PC
+PC .ri.. UserApp
+PC -do-> TTN : Internet
+TTN <-do-> LoRaWAN
+LoRaWAN <-do-> Mote
+
+Mote <-do- Pi : USB
+note left of Mote
+  This is an RN2903 with v1.05 firmware and
+  a USB-to-serial adapter.
+end note
+
+Pi .ri.. bridge
+
+note left of Pi
+  The Pi is the USB host, and provides power
+  to the Mote and to the USB-to-RJ45 bridges.
+  The arrows indicate direction of power
+  and host/device relationship. Data flows
+  bidirectionally.
+end note
+
+Pi -do-> Usb1 : USB
+Usb1 <-do-> Router1 : RJ45 Connector
+Pi -do-> Usb2 : USB
+Usb2 <-do-> Router2 : RJ45 Connector
+Pi -do-> UsbN : USB
+UsbN <-do-> RouterN : RJ45 Connector
+Usb1 .[hidden]ri.. Usb2
+Usb2 .ri.. UsbN : as needed
+@enduml

@@ -11,6 +11,10 @@ Here's a picture of the intended use case:
 <!-- see deployment.puml for the source code, or decode the URL -->
 ![UML Deployment Diagram](https://www.plantuml.com/plantuml/svg/VPDHRzCm4CVV_IbEtSkGQ5W3Um0Xj55UG115eHCFOmzkV6sifRPrTbhrs-EBPzR0LAbgOz_lV__BtVN61qbXsFL2ji4It7aaqTgTimPDW5czd87qK2zFBx_RHlwwhQ2HIjin_iC6F2KQwTqQYOvGwz_cykxdP-Yi3wzIClsCHiFr0ku5G6JcmSwRR--kusbfpHuf8C75GZnC-V8yN_xBL-VvQiBF6Ziasx7MT5gy19GdGFaIK9q0bJ1M8SnM7SAgqsRheS9miFGuGgjL9ThU3YetDsbpeo_yut7T3vYPDMcrnS8TuJ9qseCZkoMvI-rDGRZOsbvbmU2Hvj8v1iOPtphtH0W-mlmJpxXUGa6wA3B25tDbOp0M21_Wgmb81eFWuySnaciKwJTVfuqG_9rkeDOnGHo2C7pNuoQ0tIGCk2KUuaSQQAho_TLREEZGmNvHN5t3HjFk80bZL4LMvb5w92rxa4gwW5G8D0hCQ1kzqdkaNeYfPwr7HumFx1dYKrxGr-p1xTnhXHwSFI15EDYHuc8PoEUJbNfoyiLJQaba3nwqKRgLKQKqOHkqDLn0JikfsFMDmhrk4GXxoOplj2lWYmmIDdrC4z6r_fj1zlrn-h9fHkclb7hCZtaIQG4vmeNovfkOoD94M3uBowcmF2-ideNLL5Zz9qnb5VUTLWhDGzgqQ9XSYtnceVHW41KgSOD63Rl-3m00)
 
+## Modem and Modem Setup
+
+The RN2903 is configured in Class C mode using `mac set class c`. If the RN2903 is not yet joined (based on `devaddr` being `0`), the channel mask is set to 8~15/65, and then `mac join` is issued.
+
 ## Program flow
 
 Throughout the description that follows, we assume that the program is properly executing the protocol for communicating with the LoRaWAN radio. It's not enough to send a line of text; you have to get the response from the radio and know whether the radio is ready to accept another command. For example, a `mac join otaa` request gets an immediate `ok` response, but you actually need to wait for an additional `accepted` or `denied` response before the radio is ready for the next command. Similarly, an uplink using `mac tx uncnf {port} ...` gets at least two responses; first an `ok` to indicate that the transmit has been accepted by the radio, and later a `mac_tx_ok` when the full uplink completes.

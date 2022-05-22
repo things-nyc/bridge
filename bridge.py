@@ -30,10 +30,18 @@ import argparse
 import binascii
 import pty
 import os
+import queue
 import serial
 import re
 import subprocess
 import sys
+import threading
+
+##############################################################################
+#
+# The argument parser
+#
+##############################################################################
 
 def ParseArguments():
     parser = argparse.ArgumentParser(description="Bridge LoRaWAN class C modem to local comm port")
@@ -42,6 +50,12 @@ def ParseArguments():
     parser.add_argument("--radio", "-r", required=True, help="Radio comm port, or TEST for a local test", metavar="{comm}")
     parser.add_argument("--rbaud", default=57600, type=int, help="Baud rate for LoRaWAN modem port", metavar="{baudrate}")
     return parser.parse_args()
+
+##############################################################################
+#
+# Spawn a captive shell and return a file handle.
+#
+##############################################################################
 
 def spawn_captive_shell():
     """spawn captive shell and return file handle"""
@@ -57,27 +71,49 @@ def spawn_captive_shell():
             sys.exit(1)
     return (childpid, parentfd)
 
-class ChildFile():
+##############################################################################
+#
+# A simple class that implements a non-blocking API for pty subprocess I/O
+#
+##############################################################################
+
+class PtyFile():
+    """ a simple class to provide compatible non-blocking I/O to the subprocess handle when using a captive shell """
+
     def __init__(self, fd):
+        """ constructor: cache fd, and set it non-blocking """
+        self.READSIZE = 128
+
         self._fd = fd
         os.set_blocking(fd, False)
     
     def read(self, n):
+        """ equivalent of serial.Serial::read() with timeout=0 """
         try:
             return os.read(self._fd, n)
         except BlockingIOError as err:
             return b''
 
     def write(self, buf):
+        """ equivalent of serial.Serial::write """
         os.write(self._fd, buf)
     
     def reset_input_buffer(self):
-        pass
+        """ equivalent of serial.Serial::reset_input_buffer() """
+        while self.read(self.READSIZE) != b"":
+            # discard any available characters.
+            pass
 
     def __del__(self):
+        """ desctructor: make sure we close the fd """
         self.close()
 
     def close(self):
+        """
+        Explicitly close the fd, and invalidate the local copy.
+
+        Exceptions are suppressed
+        """
         if self._fd >= 0:
             try:
                 os.close(self._fd)
@@ -85,6 +121,11 @@ class ChildFile():
                 pass
             self._fd = -1
 
+##############################################################################
+#
+# A simple class that implements a non-blocking API for pty subprocess I/O
+#
+##############################################################################
 
 class App():
     def __init__(self, args):
@@ -94,8 +135,8 @@ class App():
         try:
             if self.args.local == "PTY":
                 # create a process and get handles
-                (_, parentfd) = spawn_captive_shell()
-                self.local = ChildFile(parentfd)
+                (_, fdForParentUse) = spawn_captive_shell()
+                self.local = PtyFile(fdForParentUse)
                 self._pty = True
             else:
                 self.local = serial.Serial(
@@ -107,10 +148,6 @@ class App():
         except Exception as err:
             print(f"Failed to open local port: {err}")
             sys.exit(1)
-
-        # get rid of anything that might be waiting in the buffer
-        if not self._pty:
-            self.local.reset_input_buffer()
 
         # open the radio port
         if self.args.radio == "TEST":
@@ -128,7 +165,8 @@ class App():
                 timeout=0
                 )
 
-        # get rid of anything that might be waiting in the buffer
+        # get rid of anything that might be waiting in the buffers
+        self.local.reset_input_buffer()
         self.remote.reset_input_buffer()
 
         self.data = b''

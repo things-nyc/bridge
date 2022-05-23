@@ -145,12 +145,13 @@ class App():
         if loglevel < 0:
             loglevel = 0
 
-        logging.basicConfig(level=loglevel, format='%(relativeCreated)6d %(threadName)s %(message)s')
+        logging.basicConfig(level=loglevel, format='%(relativeCreated)6d %(threadName)s %(levelname)-6s %(message)s')
         self.log = logging
         self.log.debug("Initializing App")
 
         if args.test2903:
-            self.radio = Rn2903(self.args.radio, baudrate=self.args.rbaud, log=self.log)
+            self.radio = Rn2903(self.args.radio, baudrate=self.args.rbaud, loglevel=logging.ERROR)
+
             self.initialize_radio()
             self.log.info("Radio is initialized")
             self.radio.request_exit()
@@ -206,11 +207,34 @@ class App():
             self.log.info("mac class is not C: %s", macclass)
             need_set = True
 
+        macstatus = self.radio.mac_get_status()
+        if macstatus.is_silent():
+            self.log.info("mac was silenced, turn it on")
+            self.radio.mac_force_enable()
+
+        if (not need_set) and not macstatus.need_join():
+            self.log.info("already joined, leave things alone")
+            return
+
         desired_mask = (int(1) << 65) | (int(0xFF) << 8)
         mask = self.radio.mac_get_channel_mask()
         if mask != desired_mask:
             self.log.info("mac class mask %x is not %x", mask, desired_mask)
             need_set = True
+
+        # do required init
+        if need_set:
+            if macclass != "C":
+                self.radio.mac_set_class("C")
+            diff_mask = desired_mask ^ mask
+            for iChannel in range(72):
+                iChannel_bit = int(1) << iChannel
+                if diff_mask & iChannel_bit != 0:
+                    self.radio.mac_set_channel_status(iChannel, (desired_mask & iChannel_bit) != 0)
+            self.radio.mac_save()
+            self.radio.mac_join(b"otaa")
+        elif macstatus.need_join():
+            self.radio.mac_join(b"otaa")
 
     def SaveData(self, buf):
         self.data += buf

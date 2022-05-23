@@ -30,28 +30,30 @@ import time
 #
 # There are several kinds of RN2903 commands:
 #
-# 1. commands that have immediate response of some kind of status
-# 2. commands that have immediate response of data
-# 3. commands that respond immediately, then (if "ok"), send a second response.
+# 1. commands that have immediate response: some kind of status or some kind of data
+# 2. commands that respond immediately, then (if "ok"), send a second response.
 #       mac tx
 #       mac join
 #       radio rx
 #       radio tx
-# 4. commands with no response at all
-#       sys eraseFW
-#
+# 3. commands with no response at all
+#       sys eraseFW -- we don't handle this in this driver at all.
 #
 ##############################################################################
 
 class Rn2903():
-    def __init__(self, port_name, *, baudrate=57600, cmd_timeout_sec=0.1, log=None):
+    def __init__(self, port_name, *, baudrate=57600, cmd_timeout_sec=0.1, log=None, loglevel=None):
         self.READ_TIMEOUT = 0
         self.CMD_TIMEOUT = cmd_timeout_sec
 
         if log == None:
-            log = logging
+            log = logging.getLogger(__name__)
 
         self.log = log
+        if loglevel != None:
+            self.log.setLevel(loglevel)
+
+        self.log.info("initialize RN2903 driver")
 
         try:
             self.radio = serial.Serial(
@@ -65,6 +67,7 @@ class Rn2903():
             self.log.error("Failed to open local port: %s", err)
             raise
 
+        # terminate any garbage that's waiting
         self.radio.reset_input_buffer()
 
         # create queues for input and output
@@ -80,6 +83,17 @@ class Rn2903():
         self.log.info("starting command worker thread")
         self._cmdthread.start()
 
+        # and finally: launch a command that is just discarded to get the version (ignoring errors)
+        self.send_command_indication(b"sys get ver")
+        try:
+            v = self.mac_send_command_get_response(b"sys get ver")
+        except:
+            self.request_exit()
+            raise
+
+        self.sw_version = v
+        self.log.info("radio version: %s", v)
+
     def request_exit(self):
         self.log.debug("requesting RN2903 exit")
         self._exit.set()
@@ -88,6 +102,7 @@ class Rn2903():
 
     @unique
     class Result(Enum):
+        """ status codes for radio commands """
         STATUS_PENDING = 0
 
         # these correspond to the modem responses
@@ -105,6 +120,8 @@ class Rn2903():
         STATUS_SILENT = 12
         STATUS_ERR = 13
         STATUS_UNMATCHED_RESPONSE = 14
+        STATUS_MAC_ERR = 15
+        STATUS_RADIO_ERR = 16
 
         # this means we got a response (not a status)
         STATUS_RESPONSE_RECEIVED = 98
@@ -113,30 +130,85 @@ class Rn2903():
         STATUS_INTERNAL_ERROR = 99
 
         def is_complete(self):
+            """ return True if Result indicates a completed request """
             return self.value >= self.STATUS_OK.value
         def has_response(self):
+            """ return True if Result indicates that a response was received """
             return self == self.STATUS_RESPONSE_RECEIVED
 
     class RadioError(Exception):
+        """ this is the Exception thrown for radio errors """
         pass
 
+    class MacStatus():
+        """ structured type for RN2903 mac status results words """
+        def __init__(self, mask):
+            """ constructor: initializes status from a bitmask """
+            self.value = int(mask)
+        
+        def state(self):
+            """ return the mac state """
+            return self.value & 0xF
+
+        def is_joined(self):
+            """ return True if the mac indicates that it's joined """
+            return (self.value & (1 << 4)) != 0
+
+        def need_join(self):
+            """ return True if the mac indicates that a join is needed """
+            return ((self.value & (1 << 4)) == 0) or (self.value & (1 << 17) != 0)
+
+        def is_silent(self):
+            """ return True if the mac is in forced-silent mode """
+            return (self.value & (1 << 7)) != 0
+        
+        def is_paused(self):
+            """ return True if the mac has been paused """
+            return (self.value & (1 << 8)) != 0
+
     class Command():
+        """ the mac command request block """
         def __init__(self, *, words=None, event = None):
             self.status = Rn2903.Result.STATUS_PENDING
             self.result_words = None
-            self.words = words
-
+            if words:
+                self.set_cmd(words)
             self.event = event
             if event != None:
                 event.clear()
-        
+
+        def set_cmd(self, words):
+            """ set the mac command to be transmitted """
+            self.words = words
+            self.is_mac_tx = False
+            self.is_mac_join = False
+            self.is_radio_tx = False
+            self.is_radio_rx = False
+            match words:
+                case [b"mac", b"tx", *args]:
+                    self.is_mac_tx = True
+                case [b"mac", b"join", *args]:
+                    self.is_mac_join = True
+                case [b"radio", b"tx", *args]:
+                    self.is_radio_tx = True
+                case [b"radio", b"rx", *args]:
+                    self.is_radio_rx = True
+                case _:
+                    pass
+            # logging.debug("is_mac_tx=%d is_mac_join=%d is_radio_tx=%d is_radio_rx=%d cmd=%s",
+            #                 self.is_mac_tx, self.is_mac_join, self.is_radio_tx, self.is_radio_rx,
+            #                 words)
+
         def set_status(self, status):
+            """ set the status of the command """
             self.status = status
         
         def set_response(self, words):
+            """ set the response field of the command """
             self.result_words = words
 
         def set_complete(self):
+            """ complete the request """
             if self.status == Rn2903.Result.STATUS_PENDING:
                 self.set_status(Rn2903.Result.STATUS_INTERNAL_ERROR)
             if self.event != None:
@@ -182,6 +254,16 @@ class Rn2903():
 
     # iterator that returns lines from the radio
     def _nextline(self, exitEvent):
+        """
+        iterator for delivering lines from the radio to the radio driver
+
+        exitEvent: a threading.Event(); if is_set() returns true, we stop the
+            iterator.
+
+        returns a single line of text each time, without \r\n.  Blank lines
+        are neer returned.  If there's no line but there might be more in
+        in the futuer, returns None.  IOErrors cause iterator to terminate.
+        """
         data = b''
         while not exitEvent.is_set():
             buf = b''
@@ -212,6 +294,7 @@ class Rn2903():
                 yield None
 
     def _cmdworker(self):
+        """ the thread worker routine for the driver """
         self.log.debug("entered worker thread")
         try:
             self._cmdworker_inner()
@@ -234,26 +317,34 @@ class Rn2903():
 #        e.wait()
 
     def _cmdworker_inner(self):
-        # set state to stIdle:
+        """ loop for driver thread
+        
+        This is a function to make code easier to read, as the caller
+        wraps this in a try block to ensure that the radio gets closed.
+        """
+        # set state to idle.
         cmd = None
 
         # set up line iterator
         next_line_from_modem = self._nextline(self._exit)
 
-        # process lines until we run out
+        # Process lines until we run out
+        # Use an exception block to make sure we complete a command if
+        # we die unexpectedly.
         try:
             for line in next_line_from_modem:
-                self.log.debug("received line: %s", line)
                 if line == None and cmd == None:
                     # try to fetch and launch next command,
                     cmd = self._cmdworker_promote()
                 elif line != None:
                     # got a response of some kind.
                     # make words using a single blank.
+                    self.log.info("received line: %s", line)
                     words = line.split(b' ')
 
                     if cmd != None:
                         # try to complete the command
+                        # note that a two-phase command will advance on OK status to second phase
                         if self._cmdworker_process_solicited(cmd, words):
                             self.log.debug("completing command %s status %s", cmd, cmd.status)
                             cmd.set_complete()
@@ -263,10 +354,22 @@ class Rn2903():
                             self.log.error("unsolicited message not recognized: %s", words)
         finally:
             if cmd != None:
-                cmd.set_complete(self.Result.STATUS_INTERNAL_ERROR)
+                cmd.set_status(self.Result.STATUS_INTERNAL_ERROR)
+                cmd.set_complete()
         pass
 
     def _cmdworker_promote(self):
+        """
+        Promote next command if possible, waiting for a little while.
+
+        This function is called when there's no radio inbound traffic and there's
+        no current command. We look for a command, blocking for a maximum of
+        CMD_TIMEOUT seconds.
+
+        If a command is found, we write it to the uart, record the launch time,
+        and return the command to be held by the work loop. Otherwise we return
+        None.
+        """
         cmd = None
         try:
             cmd = self._cmdqueue.get(block=True, timeout=self.CMD_TIMEOUT)
@@ -276,50 +379,87 @@ class Rn2903():
         if cmd != None:
             self.radio.write(b' '.join(cmd.words) + b"\r\n")
             self._cmd_launch_time = time.monotonic()
+            cmd.phase = 1
             self.log.debug("sent command: %s", str(b' '.join(cmd.words), encoding="ascii"))
         return cmd
 
     def _cmdworker_process_solicited(self, cmd, words):
+        """ process a response received while we're really  """
         status = None
+        phase = cmd.phase
+        mac_tx = cmd.is_mac_tx
+        mac_join = cmd.is_mac_join
+        radio_tx = cmd.is_radio_tx
+        radio_rx = cmd.is_radio_rx
+
         match words:
-            case ["ok"]:
+            case [b"ok"] if phase == 1:
                 status = self.Result.STATUS_OK
 
-            case ["busy"]:
+            case [b"busy"] if phase == 1:
                 status = self.Result.STATUS_BUSY
 
-            case ["fram_counter_err_rejoin_needed"]:
+            case [b"fram_counter_err_rejoin_needed"] if phase == 1:
                 status = self.Result.STATUS_FRAM_COUNTER_ERR_REJOIN_NEEDED
 
-            case ["invalid_class"]:
+            case [b"invalid_class"] if phase == 1:
                 status = self.Result.STATUS_INVALID_CLASS
 
-            case ["invalid_data_len"]:
+            case [b"invalid_data_len"] if phase == 1:
                 status = self.Result.STATUS_INVALID_DATA_LEN
 
-            case ["invalid_param"]:
+            case [b"invalid_param"] if phase == 1:
                 status = self.Result.STATUS_INVALID_PARAM
 
-            case ["keys_not_init"]:
+            case [b"keys_not_init"] if phase == 1:
                 status = self.Result.STATUS_KEYS_NOT_INIT
 
-            case ["mac_paused"]:
+            case [b"mac_paused"] if phase == 1:
                 status = self.Result.STATUS_MAC_PAUSED
 
-            case ["multicast_keys_not_set"]:
+            case [b"multicast_keys_not_set"] if phase == 1:
                 status = self.Result.STATUS_MULTICAST_KEYS_NOT_SET
 
-            case ["no_free_ch"]:
-                status = self.Result.STATUS_NO_FREE_CH
-
-            case ["not_joined"]:
+            case [b"not_joined"] if phase == 1 and mac_tx:
                 status = self.Result.STATUS_NOT_JOINED
 
-            case ["silent"]:
+            case [b"silent"] if phase == 1 and (mac_tx or mac_join):
                 status = self.Result.STATUS_SILENT
 
-            case ["err"]:
+            case [b"err"] if phase == 1:
                 status = self.Result.STATUS_ERR
+
+            case [b"mac_tx_ok"] if phase == 2:
+                status = self.Result.STATUS_OK
+    
+            case [b"mac_rx", port, data] if phase == 2:
+                self._process_downlink(port, data)
+                status = self.Result.STATUS_OK
+
+            case [b"mac_err"] if phase == 2 and mac_tx:
+                status = self.Result.STATUS_MAC_ERR
+
+            case [b"keys_not_init"] if phase == 1 and mac_join:
+                status = self.Result.STATUS_KEYS_NOT_INIT
+
+            case [b"no_free_ch"] if phase == 1 and (mac_join or mac_tx):
+                status = self.Result.STATUS_NO_FREE_CH
+        
+            case [b"denied"] if phase == 2 and mac_join:
+                status = self.Result.STATUS_JOIN_FAILED
+
+            case [b"accepted"] if phase == 2 and mac_join:
+                status = self.Result.STATUS_OK
+
+            case [b"radio_tx_ok"] if phase == 2 and radio_tx:
+                status = self.Result.STATUS_OK
+
+            case [b"radio_err"] if phase == 2 and radio_tx or radio_rx:
+                status = self.Result.STATUS_RADIO_ERR
+
+            case [b"radio_rx", data] if phase == 2 and radio_rx:
+                self._process_downlink(0, data)
+                status = self.Result.STATUS_OK
 
             case _:
                 if not self._cmdworker_process_unsolicited(words):
@@ -328,6 +468,11 @@ class Rn2903():
                     cmd.set_response(words)
         
         # now status is either a value or None (if the command status is not to be set)
+        if phase == 1 and (mac_tx or mac_join or radio_tx or radio_rx) and status == self.Result.STATUS_OK:
+            # this is a 2-phase command
+            cmd.phase += 1
+            return False
+
         if status != None:
             cmd.set_status(status)
             return True
@@ -336,12 +481,15 @@ class Rn2903():
 
     def _cmdworker_process_unsolicited(self, words):
         match words:
-            case ["mac_rx", port, message]:
-                self._process_downlink(binascii.unhexlify(port)[0], binascii.unhexlify(message))
+            case [b"mac_rx", port, message]:
+                self._cmdworker_mac_rx(port, message)
                 return True
 
             case _:
                 return False
+
+    def _cmdworker_mac_rx(self, port, message):
+        self._process_downlink(binascii.unhexlify(port)[0], binascii.unhexlify(message))
 
     def _complete_command(self, status):
         # grab the singleton from the pending command queue
@@ -384,7 +532,12 @@ class Rn2903():
         (s, w) = self.send_command(buf.split(b' '))
         if s.has_response():
             return str(b' '.join(w), encoding="ascii")
-        raise self.RadioError(s.name())
+        raise self.RadioError(s.name)
+
+    def mac_send_command_check_status(self, buf):
+        (s, w) = self.send_command(buf.split(b' '))
+        if s != self.Result.STATUS_OK:
+            raise self.RadioError(s.name)
 
     def mac_get_class(self):
         r = self.mac_send_command_get_response(b"mac get class")
@@ -413,12 +566,56 @@ class Rn2903():
         self.log.debug("mac channel mask: %s", binascii.hexlify(mask.to_bytes(9, byteorder='big'), '.', 2))
         return mask
 
-    def send_command_indication(self, words):
-        cmd = self.Command(words=words, event=None)
+    def mac_get_status_uncorrected(self):
+        r = self.mac_send_command_get_response(b"mac get status")
+        v = int(r, base=16)
+        self.log.debug("mac status: %x", v)
+        return self.MacStatus(v)
+
+    def mac_get_devaddr(self):
+        r = self.mac_send_command_get_response(b"mac get devaddr")
+        v = int(r, base=16)
+        self.log.debug("mac devaddr: %x", v)
+        return v
+
+    def mac_get_status(self):
+        """
+        get status, toggling is_joined according to state of devaddr
+        
+        I observed once that the status was not correct; so this seems like a good
+        idea.
+        """ 
+        status = self.mac_get_status_uncorrected()
+
+        devaddr = self.mac_get_devaddr()
+        if devaddr != 0:
+            status.value |= 1 << 4
+        else:
+            status.value &= ~(1 << 4)
+        return status
+
+    def mac_force_enable(self):
+        self.mac_send_command_check_status(b"mac forceENABLE")
+
+    def mac_set_class(self, macclass):
+        self.mac_send_command_check_status(b"mac set class " + macclass)
+
+    def mac_set_channel_status(self, iChannel, state):
+        v = b"on" if state else b"off"
+        self.mac_send_command_check_status(b"mac set ch status %d %s" % (iChannel, v))
+    
+    def mac_save(self):
+        self.mac_send_command_check_status(b"mac save")
+
+    def mac_join(self, mode):
+        self.mac_send_command_check_status(b"mac join %s" % mode)
+
+    def send_command_indication(self, buf):
+        cmd = self.Command(words=buf.split(b' '), event=None)
         self._cmdqueue.put(cmd)
 
     def write(self, port, buf):
-        words = [ 'mac', 'tx', 'uncnf', b"%d" % port, binascii.hexlify(buf) ]
-        self.log.debug("queue uplink command: %s", str(words.join(b' '), encoding='ascii'))
-        self.send_command_indication()
+        b = [ b'mac', b'tx', b'uncnf', b"%d" % port, binascii.hexlify(buf) ].join(b' ')
+        self.log.debug("queue uplink command: %s", str(b), encoding='ascii')
+        self.send_command_indication(b)
 

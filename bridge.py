@@ -154,6 +154,9 @@ class App():
 
             self.initialize_radio()
             self.log.info("Radio is initialized")
+            self.log.info("sleeping 10 seconds...")
+            time.sleep(10)
+            self.log.info("shutting down")
             self.radio.request_exit()
             sys.exit(0)
 

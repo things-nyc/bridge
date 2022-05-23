@@ -84,15 +84,16 @@ class Rn2903():
         self._cmdthread.start()
 
         # and finally: launch a command that is just discarded to get the version (ignoring errors)
-        self.send_command_indication(b"sys get ver")
-        try:
-            v = self.mac_send_command_get_response(b"sys get ver")
-        except:
-            self.request_exit()
-            raise
-
-        self.sw_version = v
-        self.log.info("radio version: %s", v)
+        for i in range(3):
+            try:
+                v = self.macll_send_command_get_response(b"sys get ver")
+                self.sw_version = v
+                self.log.info("radio version: %s", v)
+                break
+            except self.RadioError:
+                self.log.info("'sys get ver' failed, try %d", i+1)
+        else:
+            raise self.RadioError("radio failed to to respond")
 
     def request_exit(self):
         self.log.debug("requesting RN2903 exit")
@@ -122,6 +123,9 @@ class Rn2903():
         STATUS_UNMATCHED_RESPONSE = 14
         STATUS_MAC_ERR = 15
         STATUS_RADIO_ERR = 16
+
+        # these correspond to other failures
+        STATUS_TIMEOUT = 97
 
         # this means we got a response (not a status)
         STATUS_RESPONSE_RECEIVED = 98
@@ -520,32 +524,39 @@ class Rn2903():
     #   APIs for use by the client, in ascending order of abstraction
     #
     ##########################################################################
-    def send_command(self, words):
-        """ send command """
+    def macll_send_command(self, words):
+        """ send command and wait for completion """
         event = threading.Event()
         cmd = self.Command(words=words, event=event)
         self._cmdqueue.put(cmd)
         event.wait()
         return (cmd.status, cmd.result_words)
 
-    def mac_send_command_get_response(self, buf):
-        (s, w) = self.send_command(buf.split(b' '))
+    def macll_send_command_get_response(self, buf):
+        """ send command, wait for response, and return response as a string """ 
+        (s, w) = self.macll_send_command(buf.split(b' '))
         if s.has_response():
             return str(b' '.join(w), encoding="ascii")
         raise self.RadioError(s.name)
 
+    def macll_send_command_indication(self, buf):
+        """ send a command as an indication: don't wait for procssing """
+        cmd = self.Command(words=buf.split(b' '), event=None)
+        self._cmdqueue.put(cmd)
+
+
     def mac_send_command_check_status(self, buf):
-        (s, w) = self.send_command(buf.split(b' '))
+        (s, w) = self.macll_send_command(buf.split(b' '))
         if s != self.Result.STATUS_OK:
             raise self.RadioError(s.name)
 
     def mac_get_class(self):
-        r = self.mac_send_command_get_response(b"mac get class")
+        r = self.macll_send_command_get_response(b"mac get class")
         self.log.debug("current mac class is %s", r)
         return r
 
     def mac_get_channel_status(self, iChannel):
-        r = self.mac_send_command_get_response(b"mac get ch status %d" % iChannel)
+        r = self.macll_send_command_get_response(b"mac get ch status %d" % iChannel)
         match (r,):
             case ["on"]:
                 v = True
@@ -567,13 +578,13 @@ class Rn2903():
         return mask
 
     def mac_get_status_uncorrected(self):
-        r = self.mac_send_command_get_response(b"mac get status")
+        r = self.macll_send_command_get_response(b"mac get status")
         v = int(r, base=16)
         self.log.debug("mac status: %x", v)
         return self.MacStatus(v)
 
     def mac_get_devaddr(self):
-        r = self.mac_send_command_get_response(b"mac get devaddr")
+        r = self.macll_send_command_get_response(b"mac get devaddr")
         v = int(r, base=16)
         self.log.debug("mac devaddr: %x", v)
         return v
@@ -595,27 +606,29 @@ class Rn2903():
         return status
 
     def mac_force_enable(self):
+        """ send `mac forceENABLE` """
         self.mac_send_command_check_status(b"mac forceENABLE")
 
     def mac_set_class(self, macclass):
+        """ set the mac class to macclass; must be 'A', 'B', or 'C' """
         self.mac_send_command_check_status(b"mac set class " + macclass)
 
     def mac_set_channel_status(self, iChannel, state):
+        """ set the channel enable status for iChannel: True -> enable """
         v = b"on" if state else b"off"
         self.mac_send_command_check_status(b"mac set ch status %d %s" % (iChannel, v))
     
     def mac_save(self):
+        """ tell the mac to save current configuration """
         self.mac_send_command_check_status(b"mac save")
 
     def mac_join(self, mode):
+        """ tell the mac to join in specified mode: 'otaa' or 'abp' """
         self.mac_send_command_check_status(b"mac join %s" % mode)
 
-    def send_command_indication(self, buf):
-        cmd = self.Command(words=buf.split(b' '), event=None)
-        self._cmdqueue.put(cmd)
-
     def write(self, port, buf):
+        """ send the characters in buf to port; unconfirmed """
         b = [ b'mac', b'tx', b'uncnf', b"%d" % port, binascii.hexlify(buf) ].join(b' ')
         self.log.debug("queue uplink command: %s", str(b), encoding='ascii')
-        self.send_command_indication(b)
+        self.macll_send_command_indication(b)
 

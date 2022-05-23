@@ -149,57 +149,11 @@ class App():
         self.log = logging
         self.log.debug("Initializing App")
 
-        if args.test2903:
-            self.radio = Rn2903(self.args.radio, baudrate=self.args.rbaud, loglevel=logging.ERROR)
+        self.radio = Rn2903(self.args.radio, baudrate=self.args.rbaud, loglevel=logging.INFO)
 
-            self.initialize_radio()
-            self.log.info("Radio is initialized")
-            self.log.info("sleeping 10 seconds...")
-            time.sleep(10)
-            self.log.info("shutting down")
-            self.radio.request_exit()
-            sys.exit(0)
+        self.initialize_radio()
+        self.log.info("Radio is initialized")
 
-        # init a connection to the local port.
-        try:
-            if self.args.local == "PTY":
-                # create a process and get handles
-                (_, fdForParentUse) = spawn_captive_shell(self.log)
-                self.local = PtyFile(fdForParentUse)
-                self._pty = True
-            else:
-                self.local = serial.Serial(
-                    port=self.args.local,
-                    baudrate=self.args.lbaud,
-                    timeout=0
-                    )
-                self._pty = False
-        except Exception as err:
-            self.log.exception("Failed to open local port: %s", err)
-            sys.exit(1)
-
-        # open the radio port
-        if self.args.radio == "TEST":
-            # just use the console and don't wrap or unwrap
-            self._test = True
-            self.remote = serial.Serial(
-                port=os.ttyname(sys.stdin.fileno()),
-                timeout=0
-                )
-        else:
-            self._test = False
-            self.remote = serial.Serial(
-                port=self.args.radio,
-                baudrate=self.args.rbaud,
-                timeout=0
-                )
-
-        # get rid of anything that might be waiting in the buffers
-        self.local.reset_input_buffer()
-        self.remote.reset_input_buffer()
-
-        self.data = b''
-        self.downlinkPattern = re.compile(b'^mac_rx ([0-9]+) ([0-9A-F]*)$')
         return
 
     def initialize_radio(self):
@@ -216,7 +170,7 @@ class App():
             self.radio.mac_force_enable()
 
         if (not need_set) and not macstatus.need_join():
-            self.log.info("already joined, leave things alone")
+            self.log.info("Already joined as class C, assume radio state is corect")
             return
 
         desired_mask = (int(1) << 65) | (int(0xFF) << 8)
@@ -239,68 +193,19 @@ class App():
         elif macstatus.need_join():
             self.radio.mac_join(b"otaa")
 
-    def SaveData(self, buf):
-        self.data += buf
-        None
-
-    def LookForDownlink(self):
-        if self._test:
-            self.local.write(self.data)
-            self.data = b''
-            return
-
-        lines = self.data.split(b'\r\n')
-        if lines[len(lines) - 1] != b'':
-            self.data = lines.pop()
-        else:
-            self.data = b''
-        for thisLine in lines:
-            result = self.downlinkPattern.match(thisLine)
-            if result != None:
-                # matched!
-                thisMessage = result.group(2)
-                self.log.info("downlink: %s", thisMessage)
-                self.local.write(binascii.unhexlify(thisMessage))
-            else:
-                self.log.warning("ignored: %s", thisLine.decode('utf-8', 'backslashreplace'))
-
-    def PushRemoteToLocal(self):
-        buf = self.remote.read(256)
-        if len(buf) > 0:
-            self.SaveData(buf)
-            self.LookForDownlink()
-            #self.local.write(buf)
-        None
-
-    def PushLocalToRemote(self):
-        buf = self.local.read(128)
-        if len(buf) > 0:
-            if self._test:
-                self.remote.write(buf)
-            else:
-                self.log.info("uplink: %s", binascii.hexlify(buf))
-                self.remote.write(BuildTxMessage(1, buf))
-        None
-
-def BuildTxMessage(port, buf):
-    result = b"mac tx uncnf 1 " + binascii.hexlify(buf) + b"\r\n"
-    return result
-
 def main():
     global gApp
     args = ParseArguments()
     gApp = App(args)
 
-    while True:
-        try:
-            gApp.PushRemoteToLocal()
-            gApp.PushLocalToRemote()
-        except:
-            gApp.local.close()
-            gApp.remote.close()
-            if gApp._test:
-                subprocess.run(["stty", "sane"])
-            raise
+    try:
+        gApp.radio.wait_for_exit()
+    except:
+        if gApp.radio.is_running():
+            gApp.radio.request_exit()
+
+        subprocess.run(["stty", "sane"])
+        raise
     return 0
 
 if __name__ == '__main__':

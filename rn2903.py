@@ -74,32 +74,46 @@ class Rn2903():
         self._cmdqueue = queue.Queue()
         self._cmd_launch_time = -1.0
         self._rxqueue = queue.Queue()
+        self._started = threading.Event()
         self._exit = threading.Event()
         self._exited = threading.Event()
     
         # create worker threads for input and output
-        self.log.info("creating command worker thread")
+        self.log.debug("creating command worker thread")
         self._cmdthread = threading.Thread(target=self._cmdworker, name="rn2903.cmd", daemon=True)
         self.log.info("starting command worker thread")
         self._cmdthread.start()
+        self._started.set()
 
         # and finally: launch a command that is just discarded to get the version (ignoring errors)
         for i in range(3):
             try:
                 v = self.macll_send_command_get_response(b"sys get ver")
                 self.sw_version = v
-                self.log.info("radio version: %s", v)
+                self.log.info("Found radio. Version: %s", v)
                 break
             except self.RadioError:
                 self.log.info("'sys get ver' failed, try %d", i+1)
         else:
+            self.log.debug("Didn't find radio, shut down")
+            self.request_exit()
             raise self.RadioError("radio failed to to respond")
 
     def request_exit(self):
-        self.log.debug("requesting RN2903 exit")
+        """ ask the radio driver to exit, and wait for it to do so """
+        self.log.info("requesting radio driver exit")
         self._exit.set()
         self._exited.wait()
-        self.log.debug("RN2903 exited")
+        self.log.debug("radio driver exited")
+
+    def is_running(self):
+        """ return true if the radio driver is running """
+        return self._started.is_set() and not self._exited.is_set()
+
+    def wait_for_exit(self):
+        """ wait for radio driver to exit on its own """
+        if self.is_running():
+            self._exited.wait()
 
     @unique
     class Result(Enum):
@@ -343,7 +357,7 @@ class Rn2903():
                 elif line != None:
                     # got a response of some kind.
                     # make words using a single blank.
-                    self.log.info("received line: %s", line)
+                    self.log.debug("received line: %s", line)
                     words = line.split(b' ')
 
                     if cmd != None:
@@ -543,7 +557,6 @@ class Rn2903():
         """ send a command as an indication: don't wait for procssing """
         cmd = self.Command(words=buf.split(b' '), event=None)
         self._cmdqueue.put(cmd)
-
 
     def mac_send_command_check_status(self, buf):
         (s, w) = self.macll_send_command(buf.split(b' '))

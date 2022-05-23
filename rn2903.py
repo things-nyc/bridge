@@ -28,12 +28,25 @@ import time
 # Class for the RN2903. Starts a thread which then accepts commaands on
 # a queue; and another thread that gets responses.
 #
+# There are several kinds of RN2903 commands:
+#
+# 1. commands that have immediate response of some kind of status
+# 2. commands that have immediate response of data
+# 3. commands that respond immediately, then (if "ok"), send a second response.
+#       mac tx
+#       mac join
+#       radio rx
+#       radio tx
+# 4. commands with no response at all
+#       sys eraseFW
+#
+#
 ##############################################################################
 
 class Rn2903():
-    def __init__(self, port_name, *, baudrate=57600, read_timeout_sec=0, read_byte_timeout_sec=None, log=None):
-        self.READ_TIMEOUT = read_timeout_sec
-        self.READ_BYTE_TIMEOUT = read_byte_timeout_sec
+    def __init__(self, port_name, *, baudrate=57600, cmd_timeout_sec=0.1, log=None):
+        self.READ_TIMEOUT = 0
+        self.CMD_TIMEOUT = cmd_timeout_sec
 
         if log == None:
             log = logging
@@ -45,7 +58,7 @@ class Rn2903():
                 port=port_name,
                 baudrate=baudrate,
                 timeout=self.READ_TIMEOUT,
-                inter_byte_timeout=self.READ_BYTE_TIMEOUT,
+                inter_byte_timeout=None,
                 exclusive=True
                 )
         except Exception as err:
@@ -129,55 +142,6 @@ class Rn2903():
             if self.event != None:
                 self.event.set()
 
-    def send_command(self, words):
-        event = threading.Event()
-        cmd = self.Command(words=words, event=event)
-        self._cmdqueue.put(cmd)
-        event.wait()
-        return (cmd.status, cmd.result_words)
-
-    def mac_send_command_get_response(self, buf):
-        (s, w) = self.send_command(buf.split(b' '))
-        if s.has_response():
-            return str(b' '.join(w), encoding="ascii")
-        raise self.RadioError(s.name())
-
-    def mac_get_class(self):
-        r = self.mac_send_command_get_response(b"mac get class")
-        self.log.debug("current mac class is %s", r)
-        return r
-
-    def mac_get_channel_status(self, iChannel):
-        r = self.mac_send_command_get_response(b"mac get ch status %d" % iChannel)
-        match (r,):
-            case ["on"]:
-                v = True
-            case ["off"]:
-                v = False
-            case _:
-                raise self.RadioError("unrecognized channel status %s" % r)
-
-        self.log.debug("current mac channel %d status is %s", iChannel, v)
-        return v
-
-    def mac_get_channel_mask(self):
-        mask = int(0)
-        for i in range(72):
-            v = self.mac_get_channel_status(i)
-            if v:
-                mask |= int(1) << i
-        self.log.debug("mac channel mask: %s", binascii.hexlify(mask.to_bytes(9, byteorder='big'), '.', 2))
-        return mask
-
-    def send_command_indication(self, words):
-        cmd = self.Command(words=words, event=None)
-        self._cmdqueue.put(cmd)
-
-    def write(self, port, buf):
-        words = [ 'mac', 'tx', 'uncnf', b"%d" % port, binascii.hexlify(buf) ]
-        self.log.debug("queue uplink command: %s", str(words.join(b' '), encoding='ascii'))
-        self.send_command_indication()
-
     #
     # The main function of the worker thread for dealing with the modem.
     # The thread implicitly implements a FSM with two states: idle,
@@ -198,13 +162,32 @@ class Rn2903():
     # the timer expires, we return to the idle state and complete the
     # command with STATUS_TIMED_OUT.
     #
+    def _getchars(self):
+        """
+        Read as many characters as possible from the radio
+
+        We read one character unconditionally; this will cause us
+        to block if there are no characters waiting. We depend on
+        the read-timeout to get us out, so there's a maximum
+        latency here.
+        """
+        data = self.radio.read(1)
+        while True:
+            in_waiting = self.radio.in_waiting
+            if in_waiting > 0:
+                data += self.radio.read(in_waiting)
+            else:
+                break
+        return data
+
+    # iterator that returns lines from the radio
     def _nextline(self, exitEvent):
         data = b''
         while not exitEvent.is_set():
             buf = b''
             try:
-                buf = self.radio.read(256)
-            except IOErr:
+                buf = self._getchars()
+            except IOError:
                 break
 
             # if we got some data
@@ -242,13 +225,13 @@ class Rn2903():
         self.log.debug("RN2903._cmdworker exiting")     
         self._exited.set()
 
-    def _sleep(self, secs):
-        def done(e):
-            e.set()
-        e = threading.Event()
-        t = threading.Timer(0.1, done, args=(e,))
-        t.start()
-        e.wait()
+#    def _sleep(self, secs):
+#        def done(e):
+#            e.set()
+#        e = threading.Event()
+#        t = threading.Timer(0.1, done, args=(e,))
+#        t.start()
+#        e.wait()
 
     def _cmdworker_inner(self):
         # set state to stIdle:
@@ -258,36 +241,35 @@ class Rn2903():
         next_line_from_modem = self._nextline(self._exit)
 
         # process lines until we run out
-        for line in next_line_from_modem:
-            self.log.debug("received line: %s", line)
-            if line == None:
-                if cmd == None:
+        try:
+            for line in next_line_from_modem:
+                self.log.debug("received line: %s", line)
+                if line == None and cmd == None:
+                    # try to fetch and launch next command,
                     cmd = self._cmdworker_promote()
+                elif line != None:
+                    # got a response of some kind.
+                    # make words using a single blank.
+                    words = line.split(b' ')
+
                     if cmd != None:
-                        continue
-
-                # no data, sleep
-                #self._sleep(0.01)
-                continue
-
-            # make words using a single blank.
-            words = line.split(b' ')
-
+                        # try to complete the command
+                        if self._cmdworker_process_solicited(cmd, words):
+                            self.log.debug("completing command %s status %s", cmd, cmd.status)
+                            cmd.set_complete()
+                            cmd = None
+                    else:
+                        if not self._cmdworker_process_unsolicited(words):
+                            self.log.error("unsolicited message not recognized: %s", words)
+        finally:
             if cmd != None:
-                # try to complete the command
-                if self._cmdworker_process_solicited(cmd, words):
-                    self.log.debug("completing command %s status %s", cmd, cmd.status)
-                    cmd.set_complete()
-                    cmd = None
-            else:
-                if not self._cmdworker_process_unsolicited(words):
-                    self.log.error("unsolicited message not recognized: %s", words)
+                cmd.set_complete(self.Result.STATUS_INTERNAL_ERROR)
         pass
 
     def _cmdworker_promote(self):
         cmd = None
         try:
-            cmd = self._cmdqueue.get(block=False)
+            cmd = self._cmdqueue.get(block=True, timeout=self.CMD_TIMEOUT)
         except queue.Empty:
             pass
 
@@ -378,10 +360,65 @@ class Rn2903():
             self.log.debug("_complete_command, but no pending command found")
 
     class Message:
-        def __init__(port, message):
+        def __init__(self, port, message):
             self.port = port
             self.message = message
 
     def _process_downlink(self, port, message):
-        self._rxqueue.put(Message(port, message), block=False)
+        self._rxqueue.put(self.Message(port, message), block=False)
+
+    ##########################################################################
+    #
+    #   APIs for use by the client, in ascending order of abstraction
+    #
+    ##########################################################################
+    def send_command(self, words):
+        """ send command """
+        event = threading.Event()
+        cmd = self.Command(words=words, event=event)
+        self._cmdqueue.put(cmd)
+        event.wait()
+        return (cmd.status, cmd.result_words)
+
+    def mac_send_command_get_response(self, buf):
+        (s, w) = self.send_command(buf.split(b' '))
+        if s.has_response():
+            return str(b' '.join(w), encoding="ascii")
+        raise self.RadioError(s.name())
+
+    def mac_get_class(self):
+        r = self.mac_send_command_get_response(b"mac get class")
+        self.log.debug("current mac class is %s", r)
+        return r
+
+    def mac_get_channel_status(self, iChannel):
+        r = self.mac_send_command_get_response(b"mac get ch status %d" % iChannel)
+        match (r,):
+            case ["on"]:
+                v = True
+            case ["off"]:
+                v = False
+            case _:
+                raise self.RadioError("unrecognized channel status %s" % r)
+
+        self.log.debug("current mac channel %d status is %s", iChannel, v)
+        return v
+
+    def mac_get_channel_mask(self):
+        mask = int(0)
+        for i in range(72):
+            v = self.mac_get_channel_status(i)
+            if v:
+                mask |= int(1) << i
+        self.log.debug("mac channel mask: %s", binascii.hexlify(mask.to_bytes(9, byteorder='big'), '.', 2))
+        return mask
+
+    def send_command_indication(self, words):
+        cmd = self.Command(words=words, event=None)
+        self._cmdqueue.put(cmd)
+
+    def write(self, port, buf):
+        words = [ 'mac', 'tx', 'uncnf', b"%d" % port, binascii.hexlify(buf) ]
+        self.log.debug("queue uplink command: %s", str(words.join(b' '), encoding='ascii'))
+        self.send_command_indication()
 

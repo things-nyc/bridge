@@ -31,6 +31,14 @@ The program has two distinct phases of operation.
 
    We guess that the uplink direction may require a limited queue depth to avoid denial of service if multiple routers are jabbering concurrently; we may need in the future to allow the LoRaWAN network to quench all routers except one of interest. This is not implemented yet.
 
+## Radio driver
+
+The application spawns a thread as a simple driver for the RN2903. The thread manages all communication with the 2903. It receives serializes commands via a queue, and dispatches downlinks via a separate queue.
+
+Here's a simple FSM:
+
+![Driver FSM](https://www.plantuml.com/plantuml/svg/RP3DIaGn38NtVOginSliNSY88FWCugAs1mdsvzgaWoA-kvaxjZEBMJK_tqcQinVrJNjEpW85YJuNLlOZVmZA1z2F8vf0JBX87tDqlywztBpI4fVxYmapcesZqfrUkgErrG0HwaLgui2AI0sorYAGoItDjDiQamX08SUtz45SwBEZmxdHHD7slJEcH0erPs-lLier8azezKrmNaC-XDeYbtT3Xsh2cpcadD7-QqkQbvo-CqVHxYXV4nItLWprS5sqZQjTp_pqPFZqnCKd8_75IWrsfgWRvOqnjzqU9VQS_W00)
+
 ## To do
 
 As of this writing, the code is still a very raw prototype. See the list of issues in the repository.

@@ -1,0 +1,23 @@
+@startuml
+state stInitial
+state Active {
+  state stIdle
+  state stCmd
+}
+
+[*] -d-> stInitial
+stInitial -d-> stIdle
+
+stIdle : process unsolicited responses
+
+stIdle -r-> stCmd : see cmdblk in queue
+
+stCmd : entry/ send command to modem
+stCmd : parse responses according to command
+stCmd : start timer
+stCmd -l-> stIdle : see response / complete, recover
+stCmd -l-> stIdle : timeout / complete
+
+stIdle -d-> stFinal : exit request
+stFinal -d-> [*]
+@enduml

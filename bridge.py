@@ -56,7 +56,6 @@ def ParseArguments():
     parser.add_argument("--radio", "-r", required=True, help="Radio comm port, or TEST for a local test", metavar="{comm}")
     parser.add_argument("--rbaud", default=57600, type=int, help="Baud rate for LoRaWAN modem port", metavar="{baudrate}")
     parser.add_argument("--verbose", "-v", action='count', default=0)
-    parser.add_argument("--test2903", action="store_true", help="Invoke the RN2903 test instead of starting")
     return parser.parse_args()
 
 ##############################################################################

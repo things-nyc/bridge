@@ -45,6 +45,8 @@ class Rn2903():
     def __init__(self, port_name, *, baudrate=57600, cmd_timeout_sec=0.1, log=None, loglevel=None):
         self.READ_TIMEOUT = 0
         self.CMD_TIMEOUT = cmd_timeout_sec
+        self.PHASE_ONE_TIMEOUT = 100 * 1000 * 1000          # 100 ms
+        self.PHASE_TWO_TIMEOUT = 10 * 1000 * 1000 * 1000    # 10 seconds
 
         if log == None:
             log = logging.getLogger(__name__)
@@ -95,9 +97,10 @@ class Rn2903():
             except self.RadioError:
                 self.log.info("'sys get ver' failed, try %d", i+1)
         else:
-            self.log.debug("Didn't find radio, shut down")
+            self.log.error("didn't find radio, shut down")
             self.request_exit()
-            raise self.RadioError("radio failed to to respond")
+            self.radio.close()
+            raise self.RadioError("radio not found")
 
     def request_exit(self):
         """ ask the radio driver to exit, and wait for it to do so """
@@ -354,6 +357,15 @@ class Rn2903():
                 if line == None and cmd == None:
                     # try to fetch and launch next command,
                     cmd = self._cmdworker_promote()
+                elif line == None and cmd != None:
+                    # we are working on a command but nothing has
+                    # happened. Check for timeout.
+                    dt = time.monotonic_ns() - self._cmd_launch_time
+                    if (cmd.phase == 1 and dt > self.PHASE_ONE_TIMEOUT) or  \
+                       (cmd.phase == 2 and dt > self.PHASE_TWO_TIMEOUT)     :
+                        cmd.set_status(self.Result.STATUS_TIMEOUT)
+                        cmd.set_complete()
+                        cmd = None
                 elif line != None:
                     # got a response of some kind.
                     # make words using a single blank.
@@ -396,7 +408,7 @@ class Rn2903():
 
         if cmd != None:
             self.radio.write(b' '.join(cmd.words) + b"\r\n")
-            self._cmd_launch_time = time.monotonic()
+            self._cmd_launch_time = time.monotonic_ns()
             cmd.phase = 1
             self.log.debug("sent command: %s", str(b' '.join(cmd.words), encoding="ascii"))
         return cmd

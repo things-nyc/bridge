@@ -77,7 +77,11 @@ class App():
         self.log = logging
         self.log.debug("Initializing App")
 
-        self.radio = Rn2903(self.args.radio, baudrate=self.args.rbaud, loglevel=logging.INFO)
+        self.radio = Rn2903(
+            self.args.radio,
+            baudrate=self.args.rbaud,
+            loglevel=logging.INFO if loglevel > logging.INFO else loglevel
+            )
 
         self.initialize_radio()
         self.log.info("Radio is initialized")
@@ -117,9 +121,12 @@ class App():
                 if diff_mask & iChannel_bit != 0:
                     self.radio.mac_set_channel_status(iChannel, (desired_mask & iChannel_bit) != 0)
             self.radio.mac_save()
+            self.log.info("mac parameters set and saved")
+
+        if need_set or macstatus.need_join():
+            self.log.info("joining...")
             self.radio.mac_join(b"otaa")
-        elif macstatus.need_join():
-            self.radio.mac_join(b"otaa")
+            self.log.info("join accepted")
 
 def main():
     global gApp

@@ -13,7 +13,7 @@ Here's a diagram of the intended use case:
 
 ## Modem and Modem Setup
 
-LoRaWAN modems generally have significatn stored state. During startup, `bridge` queries the state of the modem and tries to ensure that it's in the proper state:
+LoRaWAN modems generally have significant stored state. During startup, `bridge` queries the state of the modem and tries to ensure that it's in the proper state:
 
 | Desired state | Action taken to enforce |
 |---------------|-------------------------|
@@ -33,11 +33,13 @@ The program has two distinct phases of operation.
 
 2. **Operation:** the program monitors all the serial ports concurrently.
 
-   * unsolicited messages from the radio are checked to see if they're downlinks. If so, the port number is used to select a given serial port/router, and the data is forwarded.
+   * Unsolicited messages from the radio are checked to see if they're downlinks. If so, the port number is used to select a given serial port/router, and the data is forwarded.
 
-   * characters from the router serial ports are collected into uplinks that are sent on port `n`, where `n` is the router number. Because of the long delays involved in LoRaWAN uplinks, we have to maintain a queue of commands to the radio; this handles both long messages from an individual router, and situations where multiple routers talk at the same time (for example, after a power failure).
+   * Characters from the router serial ports are collected into uplinks that are sent on port `n`, where `n` is the router number. Because of the long delays involved in LoRaWAN uplinks, we have to maintain a queue of commands to the radio; this handles both long messages from an individual router, and situations where multiple routers talk at the same time (for example, after a power failure).
 
-   We guess that the uplink direction may require a limited queue depth to avoid denial of service if multiple routers are jabbering concurrently; we may need in the future to allow the LoRaWAN network to quench all routers except one of interest. This is not implemented yet.
+   We guess that the uplink direction may require a limited queue depth to avoid denial of service if multiple routers are jabbering concurrently.
+
+   We may need in the future to allow the LoRaWAN network to quench all routers except one of interest. This is not implemented yet.
 
 ## Radio driver
 

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<c:Diagram
+xmlns:c="http://www.cadifra.com/schema/1.0"
+xmlns:c1v3="http://www.cadifra.com/schema/1.3"
+ProductVersion="1.3.3">
+
+<Page id="r1"
+Size="8"
+Width="29700"
+Height="42000"
+Landscape="1"
+Rows="1"
+Columns="1"
+Margins="1016 1016 1016 1016"
+CutGlueMargins="1016 1016 1016 1016"
+Scale="1"/>
+
+<DiagramType id="r2"
+TypeValue="2"/>
+
+<Style id="r3">
+<dir n="Base" Typeface="arial" Size="11" Bold="0">
+<dir n="Free Text" Size="10" Bold="0"/>
+<dir n="Object Diagram">
+<dir n="Link" Bold="1"/>
+<dir n="Object" Bold="0">
+<dir n="Compartment" Size="8"/>
+<dir n="Header" Bold="1"/>
+</dir>
+<dir n="Role" Bold="0"/>
+</dir>
+</dir>
+</Style>
+
+<Object id="r4"
+Pos="16300 -1600"
+Size="2000 1000">
+<Text>App</Text>
+</Object>
+
+<Object id="r5"
+Pos="18400 -4700"
+Size="2000 1000">
+<Text>Radio</Text>
+</Object>
+
+<Object id="r6"
+Pos="15100 -8200"
+Size="2600 1000">
+<Text>ControlPort</Text>
+</Object>
+
+<Object id="r7"
+Pos="21300 -8200"
+Size="2600 1000">
+<Text>DataPort</Text>
+</Object>
+
+<Object id="r8"
+Pos="21400 -11000"
+Size="2600 1800">
+<Text>SerialLike</Text>
+<Compartment id="r43"
+Pos="21400 -12000"
+Size="2600 800">
+<Text>&lt;text?&gt;</Text>
+</Compartment>
+</Object>
+
+<Link id="r9">
+<End id="r10"
+Pos="19200 -5700"
+Object="r5"
+Type="1"
+Traversed="1"/>
+<Segment id="r11"
+Ends="r10 r12"
+Oblique="1"/>
+<End id="r12"
+Pos="16700 -8200"
+Object="r6"
+Type="1">
+<Anchor id="r44"
+Pos="16700 -8200">
+<FreeText id="r45"
+Pos="17061 -8200"
+Origin="4">
+<Text>1:1</Text>
+</FreeText>
+</Anchor>
+</End>
+</Link>
+
+<Link id="r13">
+<End id="r14"
+Pos="17200 -2600"
+Object="r4"
+Type="2"
+Traversed="1">
+<Anchor id="r50"
+Pos="17200 -2600">
+<FreeText id="r51"
+Pos="16939 -2700"
+Origin="2">
+<Text>1:1</Text>
+</FreeText>
+</Anchor>
+</End>
+<Segment id="r15"
+Ends="r14 r16"
+Oblique="1">
+<Anchor id="r35"
+Pos="17063.893153208475 -3292.9075836659504">
+<FreeText id="r36"
+Pos="16564 -3347"
+Origin="2">
+<Text>control</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r16"
+Pos="16100 -8200"
+Object="r6"
+Type="1"
+Traversed="1"/>
+</Link>
+
+<Link id="r17">
+<End id="r18"
+Pos="17700 -8700"
+Object="r6"
+Type="2">
+<Anchor id="r33"
+Pos="17700 -8700">
+<FreeText id="r34"
+Pos="17900 -8500"
+Origin="4">
+<Text>1:n</Text>
+</FreeText>
+</Anchor>
+</End>
+<Segment id="r19"
+Ends="r18 r20"/>
+<End id="r20"
+Pos="21300 -8700"
+Object="r7"
+Type="1"/>
+</Link>
+
+<Link id="r21">
+<End id="r22"
+Pos="22400 -8200"
+Object="r7"
+Type="1">
+<Anchor id="r46"
+Pos="22400 -8200">
+<FreeText id="r47"
+Pos="22500 -8200"
+Origin="4">
+<Text>n:1</Text>
+</FreeText>
+</Anchor>
+</End>
+<Segment id="r23"
+Ends="r22 r24"
+Oblique="1"/>
+<End id="r24"
+Pos="19800 -5700"
+Object="r5"
+Type="1"
+Traversed="1"/>
+</Link>
+
+<Link id="r25">
+<End id="r26"
+Pos="17600 -2600"
+Object="r4"
+Type="2"
+Traversed="1">
+<Anchor id="r48"
+Pos="17600 -2600">
+<FreeText id="r49"
+Pos="18061 -2600"
+Origin="1">
+<Text>1:1</Text>
+</FreeText>
+</Anchor>
+</End>
+<Segment id="r27"
+Ends="r26 r28"
+Oblique="1">
+<Anchor id="r37"
+Pos="18143.243243243243 -3233.7837837837837">
+<FreeText id="r38"
+Pos="18744 -3334"
+Origin="4">
+<Text>radio</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r28"
+Pos="19400 -4700"
+Object="r5"
+Type="1"
+Traversed="1"/>
+</Link>
+
+<Link id="r29">
+<End id="r30"
+Pos="22700 -9200"
+Object="r7"
+Type="2">
+<Anchor id="r41"
+Pos="22700 -9200">
+<FreeText id="r42"
+Pos="22469 -9300"
+Origin="2">
+<Text>1:1</Text>
+</FreeText>
+</Anchor>
+</End>
+<Segment id="r31"
+Ends="r30 r32">
+<Anchor id="r39"
+Pos="22700 -9400">
+<FreeText id="r40"
+Pos="22900 -9400"
+Origin="1">
+<Text>serial</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r32"
+Pos="22700 -11000"
+Object="r8"
+Type="1"
+Traversed="1"/>
+</Link>
+
+</c:Diagram>

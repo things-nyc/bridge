@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<SDBSystem Type="SDBSystem">
+  <Version>15</Version>
+  <ElementId>42341072-b2b6-4520-90d2-172fcf7ac13d</ElementId>
+  <Name>System</Name>
+  <HasSeparateFile>true</HasSeparateFile>
+  <Children>
+    <SystemElement Type="SequenceDiagramProxy">
+      <ElementId>bfd13022-399f-4146-8470-7d66a71bb776</ElementId>
+      <Name>Sequence</Name>
+      <HasSeparateFile>false</HasSeparateFile>
+      <Children />
+      <Diagram Type="SequenceDiagram">
+        <Version>1.0</Version>
+        <ShowTitle>true</ShowTitle>
+        <ShowDescription>true</ShowDescription>
+        <ElementDocumentationDisplay>Default</ElementDocumentationDisplay>
+        <FlowNoteDisplayLevel>Default</FlowNoteDisplayLevel>
+        <FreeNoteDisplayLevel>Default</FreeNoteDisplayLevel>
+        <LifelineWidthMultiplier>1</LifelineWidthMultiplier>
+        <Header Type="SequenceHeader">
+          <HeaderElements>
+            <HeaderElement Type="SequenceHeaderActor">
+              <Name>User</Name>
+              <DisplayName>true</DisplayName>
+              <DisplayClassifier>false</DisplayClassifier>
+              <Documentation />
+              <ElementId>2898f770-0148-4355-bf6b-5447d00d8366</ElementId>
+            </HeaderElement>
+            <HeaderElement Type="SequenceHeaderObject">
+              <Name>ramp</Name>
+              <DisplayName>true</DisplayName>
+              <DisplayClassifier>true</DisplayClassifier>
+              <Documentation />
+              <ElementId>c8d19ce4-17c5-46ff-85ab-15375cce0a30</ElementId>
+            </HeaderElement>
+            <HeaderElement Type="SequenceHeaderSeparator">
+              <Text>network</Text>
+              <Documentation />
+              <ElementId>44129550-853f-402b-8141-10064a95955c</ElementId>
+            </HeaderElement>
+            <HeaderElement Type="SequenceHeaderGroup">
+              <Text>bridge</Text>
+              <GroupElements>
+                <GroupElement Type="SequenceHeaderObject">
+                  <Name>ControlPlane</Name>
+                  <DisplayName>true</DisplayName>
+                  <DisplayClassifier>true</DisplayClassifier>
+                  <Documentation />
+                  <ElementId>3f45dc5b-1e9f-4376-bb25-3d7fe7583f24</ElementId>
+                </GroupElement>
+                <GroupElement Type="SequenceHeaderObject">
+                  <Name>Port</Name>
+                  <DisplayName>true</DisplayName>
+                  <DisplayClassifier>true</DisplayClassifier>
+                  <Documentation />
+                  <ElementId>8886a102-1738-442a-83a4-595737c51f51</ElementId>
+                </GroupElement>
+              </GroupElements>
+              <Documentation />
+              <ElementId>35aa2331-2a55-4a4f-95d2-2872eb2eaa55</ElementId>
+            </HeaderElement>
+            <HeaderElement Type="SequenceHeaderSeparator">
+              <Text>serial</Text>
+              <Documentation />
+              <ElementId>509238c0-ce14-474f-8746-7c787c761bf0</ElementId>
+            </HeaderElement>
+            <HeaderElement Type="SequenceHeaderActor">
+              <Name>Target</Name>
+              <DisplayName>true</DisplayName>
+              <DisplayClassifier>false</DisplayClassifier>
+              <Documentation />
+              <ElementId>3eb8157b-31e7-4f1a-aa73-692dc543e8c0</ElementId>
+            </HeaderElement>
+          </HeaderElements>
+        </Header>
+        <Body Type="SequenceBody">
+          <BodyElements>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>get known bridges</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <GuidelineAppearance Type="SequenceBodyElementApperance" />
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>3c5d37f4-3184-41b5-ad0a-ab75cde8fd53</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceReturnMessage">
+              <Name>display known bridges</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>31a4df68-bd07-4bb6-ba98-b382f7e5deb4</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Select desired bridge</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>f7220865-1e32-4410-9ca7-f44ed22e3e53</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>Connect to bridge</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>94390e86-1bd1-4d19-ae25-edf24b6fa64e</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>save bridge selection</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>2311ee2f-a14a-4970-b486-95326a941365</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceReturnMessage">
+              <Name>return</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>211b74db-1bf4-41fd-85e1-f226ae43c577</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>get known ports</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>506a5e69-d0a0-43bd-b2e0-0013fb659d70</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>query ports</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ControlPlane</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>7f2a8a97-e92e-40cb-a8a1-bbaa5520b949</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceReturnMessage">
+              <Name>return</Name>
+              <Attributes>list of configured ports</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>ControlPlane</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>bd534e2b-7472-4550-a682-b59f47d24bd3</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Select desired port</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>c1f2995d-a1d4-40de-980c-41339071665e</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>connect to port</Name>
+              <Attributes>port id</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>83635a6e-21db-4483-a73f-72619b94097b</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>connect to port</Name>
+              <Attributes>port id, maybe an encapsulated NaCl secret</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ControlPlane</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>cff48d9e-d28c-4bbf-876f-3308fbbcd92b</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Assign a MAC port number</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ControlPlane</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>82dd822e-8f29-4c03-a0bd-c5facd2d8bdb</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCreateMessage">
+              <Name>create port</Name>
+              <Attributes>port id</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>Port</Destination>
+              <Source>ControlPlane</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>28cb24a3-01bf-4c31-828c-5c9bcfb3cf9b</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Open file handle to port</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>243428d6-067c-488a-858a-ebbed5b57bd1</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceReturnMessage">
+              <Name>return</Name>
+              <Attributes>session ID, maybe corresponding secret</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ControlPlane</Destination>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>00e255b3-6ac5-4215-a0b4-94a9ee44f001</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceReturnMessage">
+              <Name>return</Name>
+              <Attributes>success, secret, MAC port number</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>ControlPlane</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>e286d1c9-b710-49a5-9df0-2ff5c40b1be2</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>Indicate success</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>5f6c6353-d903-4a5d-b90b-4d25108960cf</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>open /dev/tty in binary mode</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>ef6eab94-e054-4fee-b2eb-ada2afaa8714</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceScenarioStart">
+              <Text>Full duplex operation</Text>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>21142c1a-a0cd-4c4e-984b-3e229eb0d370</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceScenarioCase">
+              <Text>Uplink data</Text>
+              <BraceOnLeft>true</BraceOnLeft>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>0f2f2e0f-9648-4890-8843-4ea8fbdb1421</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>Transmit data</Name>
+              <Attributes>Characters</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>Port</Destination>
+              <Source>Target</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>860d5e50-977b-4edf-a019-cca16f376010</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Collect somenumber of chaacters (10ms or line,or 100ms... TBD)</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>cb2ea73b-252b-497d-8271-2ddd6132f8d2</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Prepare data for transmit</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>e21f6049-b800-40b5-bc75-a6727d562576</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>uplink</Name>
+              <Attributes>MAC port, data (up to 232 bytes)</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>a53c2200-c6ae-41c5-85ed-1f1f14200469</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>prepare for presentation</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>d1cf4c7e-d012-473d-930a-393a1c43d687</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>Send data</Name>
+              <Attributes>Characters</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>3214177c-06c9-47d7-9977-4d1edc3e39c0</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceScenarioCase">
+              <Text>Downlink data</Text>
+              <BraceOnLeft>true</BraceOnLeft>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>2afea382-7d04-4a66-bd48-fca5add46cf5</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>send characters (up to newline)</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>2f03c992-d842-456f-9ec3-939ec104a0f8</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>accumulate chars</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>fcb29353-0f20-4fa3-9768-fea46664ac39</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>echo characters</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>1c3be13b-7d06-4dae-9160-811d435affc4</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>send newline</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>ramp</Destination>
+              <Source>User</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>a00ca08b-bd03-4fa2-abb5-fe650dd926e9</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>echo newline</Name>
+              <Attributes />
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>User</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>6555da9b-7ef0-4435-8674-8edddf2660c4</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>prepare data for transmit</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>b35d8ca9-fdc8-4444-927c-3bb326657c1a</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceCallMessage">
+              <Name>send downlink</Name>
+              <Attributes>MAC port, data</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>true</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>Port</Destination>
+              <Source>ramp</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>e224b14c-7d15-4ba4-9f1a-cbe2ab693453</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAction">
+              <Name>Prepare for presentation</Name>
+              <ShareGuideline>true</ShareGuideline>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>2e3f5d19-cd25-48b4-9884-a411aa65af19</ElementId>
+            </BodyElement>
+            <BodyElement Type="SequenceAsynchronousMessage">
+              <Name>Transmit data</Name>
+              <Attributes>characters</Attributes>
+              <ShareGuideline>false</ShareGuideline>
+              <IsReturnable>false</IsReturnable>
+              <EmbeddedReturn>false</EmbeddedReturn>
+              <ReturnText />
+              <Destination>Target</Destination>
+              <Source>Port</Source>
+              <Documentation />
+              <ShowDocumentation>false</ShowDocumentation>
+              <ElementId>aca4a980-f543-4bf3-81a4-cb0411f55144</ElementId>
+            </BodyElement>
+          </BodyElements>
+        </Body>
+        <Version>15</Version>
+        <DiagramId>bfd13022-399f-4146-8470-7d66a71bb776</DiagramId>
+        <Author />
+        <Keywords />
+        <Version />
+        <ScalingFactor>
+          <Width>1</Width>
+          <Height>1</Height>
+        </ScalingFactor>
+        <DefaultFontName>Arial</DefaultFontName>
+        <DefaultFontSize>8</DefaultFontSize>
+        <OverrideFooterDefaults>false</OverrideFooterDefaults>
+        <FooterTextLeft />
+        <FooterTextCenter />
+        <FooterTextRight />
+        <ModificationTimeTicks>637891037139630766</ModificationTimeTicks>
+      </Diagram>
+    </SystemElement>
+  </Children>
+  <FooterTextLeft />
+  <FooterTextCenter>Page [Page#] of [TotalPages]</FooterTextCenter>
+  <FooterTextRight />
+  <SDSVersion />
+  <Preferences>COxo+7mmPQNHl8TTma1lw1cKAAAAABoAAQAmEeMNls+pSpM8jm8NZm5qAQAAAwADS2V5Dg5TdWJQcmVmZXJlbmNlczoGVmFsdWVzOgEAABoDADoEAgABAgABAAIADgUDAAhNYWluRm9ybRoBAQAEAAAOAgMAADoEBQABAgABAAIADgUGAAZMYXlvdXQaAQEABwAADgIGAAA6BAgAAQIAAAACAAA6BAkAAQIAAgACAA4FCgAHVmVyc2lvbhoAAgB4vTdWHtsXT6504oO8+JLNAQAAAwAETmFtZQ4IVHlwZUNvZGUKBVZhbHVlGgsAAA4FDAAHVmVyc2lvbgAKAAAAAApABgAADgUNAAEwGgECAA4AAA4FDwABMAAVAAAAABoAAwAKqnp3F8hxRYyudl7/DVa5AAABEAAIAARTaXplFwD4AgAAEgIAAA5Gb3JtTGF5b3V0RGF0YRoAGgAEAIXaO98MxgtHgeTPdwIchQ0AAAABAAREYXRhGhEAABoBAQASAAAaAwA6BBMAAQIAAAACAAA6BBQAAQIAAwACAA4FFQAgQ2xhc3NpZmllckV4cGxvcmVyRXhwYW5zaW9uU3RhdGUaAQIAFgAADgIVAAAVAAAAABoABQAHxP4d1+6MTZGOuals+Q55AAABFwABAAREYXRhOgA6BBgAAQIAAQACAA4FGQAkNDIzNDEwNzItYjJiNi00NTIwLTkwZDItMTcyZmNmN2FjMTNkAAEOBRoAHURpYWdyYW1FeHBsb3JlckV4cGFuc2lvblN0YXRlGgECABsAAA4CGgAAFQAAAAAaAQUAHAABAAREYXRhOgA6BB0AAQIAAgACAA4FHgAkYmZkMTMwMjItMzk5Zi00MTQ2LTg0NzAtN2Q2NmE3MWJiNzc2AAEOBR8AJDQyMzQxMDcyLWIyYjYtNDUyMC05MGQyLTE3MmZjZjdhYzEzZAABDgUgAA5Eb2NrTGF5b3V0RGF0YRoBAgAhAAAOAiAAAA4AAAAADgUiAOwtQUFFQUFBRC8vLy8vQVFBQUFBQUFBQUFNQWdBQUFHeEpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTUyTlM0eUxDQldaWEp6YVc5dVBUVXVNaTR5TURBMU1pNHhNRE01TENCRGRXeDBkWEpsUFc1bGRYUnlZV3dzSUZCMVlteHBZMHRsZVZSdmEyVnVQVGRrWkRWak16RTJNMll5WTJRd1kySUZBUUFBQUM1SmJtWnlZV2RwYzNScFkzTXVWMmx1TGxWc2RISmhWMmx1Ukc5amF5NVZiSFJ5WVVSdlkydE5ZVzVoWjJWeUJnQUFBQXhEYjI1MGNtOXNVR0Z1WlhNSlJHOWphMEZ5WldGekUxVnVjR2x1Ym1Wa1ZHRmlTVzVtYjB4bFpuUVNWVzV3YVc1dVpXUlVZV0pKYm1adlZHOXdGVlZ1Y0dsdWJtVmtWR0ZpU1c1bWIwSnZkSFJ2YlJSVmJuQnBibTVsWkZSaFlrbHVabTlTYVdkb2RBUUVCQVFFQkR4SmJtWnlZV2RwYzNScFkzTXVWMmx1TGxWc2RISmhWMmx1Ukc5amF5NUViMk5yWVdKc1pVTnZiblJ5YjJ4UVlXNWxjME52Ykd4bFkzUnBiMjRDQUFBQU1VbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMa1J2WTJ0QmNtVmhjME52Ykd4bFkzUnBiMjRDQUFBQU1VbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMbFZ1Y0dsdWJtVmtWR0ZpUVhKbFlVbHVabThDQUFBQU1VbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMbFZ1Y0dsdWJtVmtWR0ZpUVhKbFlVbHVabThDQUFBQU1VbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMbFZ1Y0dsdWJtVmtWR0ZpUVhKbFlVbHVabThDQUFBQU1VbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMbFZ1Y0dsdWJtVmtWR0ZpUVhKbFlVbHVabThDQUFBQUFnQUFBQWtEQUFBQUNRUUFBQUFKQlFBQUFBa0dBQUFBQ1FjQUFBQUpDQUFBQUFVREFBQUFQRWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNUViMk5yTGtSdlkydGhZbXhsUTI5dWRISnZiRkJoYm1WelEyOXNiR1ZqZEdsdmJnRUFBQUFGUTI5MWJuUUFDQUlBQUFBQ0FBQUFCUVFBQUFBeFNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmtSdlkyc3VSRzlqYTBGeVpXRnpRMjlzYkdWamRHbHZiZ0lBQUFBRlEyOTFiblFCTUFBRUNDcEpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTVFYjJOclFYSmxZVkJoYm1VQ0FBQUFBZ0FBQUFFQUFBQUpDUUFBQUFVRkFBQUFNVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNUViMk5yTGxWdWNHbHVibVZrVkdGaVFYSmxZVWx1Wm04Q0FBQUFDWFJoWWtkeWIzVndjd3QwWVdKQmNtVmhVMmxrWlFRRU5FbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1RWIyTnJMbFZ1Y0dsdWJtVmtWR0ZpUjNKdmRYQkpibVp2VzEwQ0FBQUFLRWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNUViMk5yTGtSdlkydGxaRk5wWkdVQ0FBQUFBZ0FBQUFrS0FBQUFCZlgvLy84b1NXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmtSdlkyc3VSRzlqYTJWa1UybGtaUUVBQUFBSGRtRnNkV1ZmWHdBSUFnQUFBQUFBQUFBQkJnQUFBQVVBQUFBSkRBQUFBQUh6Ly8vLzlmLy8vd0VBQUFBQkJ3QUFBQVVBQUFBSkRnQUFBQUh4Ly8vLzlmLy8vd0lBQUFBQkNBQUFBQVVBQUFBSkVBQUFBQUh2Ly8vLzlmLy8vd01BQUFBTUVnQUFBRkZUZVhOMFpXMHVSSEpoZDJsdVp5d2dWbVZ5YzJsdmJqMHlMakF1TUM0d0xDQkRkV3gwZFhKbFBXNWxkWFJ5WVd3c0lGQjFZbXhwWTB0bGVWUnZhMlZ1UFdJd00yWTFaamRtTVRGa05UQmhNMkVGQ1FBQUFDcEpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTVFYjJOclFYSmxZVkJoYm1VSUFBQUFCRk5wZW1VQ1NXUU9SRzlqYTJWa1VHRnlaVzUwU1dRUVJteHZZWFJwYm1kUVlYSmxiblJKWkFWUVlXNWxjdzVEYUdsc1pGQmhibVZUZEhsc1pSQlRaV3hsWTNSbFpGUmhZa2x1WkdWNERrUnZZMnRsWkV4dlkyRjBhVzl1QkFNREF3UUFBQUFUVTNsemRHVnRMa1J5WVhkcGJtY3VVMmw2WlJJQUFBQUxVM2x6ZEdWdExrZDFhV1FMVTNsemRHVnRMa2QxYVdRTFUzbHpkR1Z0TGtkMWFXUTFTVzVtY21GbmFYTjBhV056TGxkcGJpNVZiSFJ5WVZkcGJrUnZZMnN1Ukc5amEyRmliR1ZRWVc1bGMwTnZiR3hsWTNScGIyNENBQUFBQ0FnSUFnQUFBQVh0Ly8vL0UxTjVjM1JsYlM1RWNtRjNhVzVuTGxOcGVtVUNBQUFBQlhkcFpIUm9CbWhsYVdkb2RBQUFDQWdTQUFBQXpnQUFBQXdEQUFBRTdQLy8vd3RUZVhOMFpXMHVSM1ZwWkFzQUFBQUNYMkVDWDJJQ1gyTUNYMlFDWDJVQ1gyWUNYMmNDWDJnQ1gya0NYMm9DWDJzQUFBQUFBQUFBQUFBQUFBZ0hCd0lDQWdJQ0FnSUNkNkoyeW9WSmdVYWtxZldrTHcxYTFnSHIvLy8vN1AvLy93QUFBQUFBQUFBQUFBQUFBQUFBQUFBQjZ2Ly8vKy16Ly8vOEFBQUFBQUFBQUFBQUFBQUFBQUFBQUNSY0FBQUFDQUFBQUFBQUFBQUVBQUFBSENnQUFBQUFCQUFBQUFBQUFBQVF5U1c1bWNtRm5hWE4wYVdOekxsZHBiaTVWYkhSeVlWZHBia1J2WTJzdVZXNXdhVzV1WldSVVlXSkhjbTkxY0VsdVptOENBQUFBQnd3QUFBQUFBUUFBQUFBQUFBQUVNa2x1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNUViMk5yTGxWdWNHbHVibVZrVkdGaVIzSnZkWEJKYm1adkFnQUFBQWNPQUFBQUFBRUFBQUFBQUFBQUJESkpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTVWYm5CcGJtNWxaRlJoWWtkeWIzVndTVzVtYndJQUFBQUhFQUFBQUFBQkFBQUFBQUFBQUFReVNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmtSdlkyc3VWVzV3YVc1dVpXUlVZV0pIY205MWNFbHVabThDQUFBQUJSY0FBQUExU1c1bWNtRm5hWE4wYVdOekxsZHBiaTVWYkhSeVlWZHBia1J2WTJzdVJHOWphMkZpYkdWUVlXNWxjME52Ykd4bFkzUnBiMjREQUFBQUJVTnZkVzUwQVRBQk1RQUVCQWd4U1c1bWNtRm5hWE4wYVdOekxsZHBiaTVWYkhSeVlWZHBia1J2WTJzdVJHOWphMkZpYkdWRGIyNTBjbTlzVUdGdVpRSUFBQUF4U1c1bWNtRm5hWE4wYVdOekxsZHBiaTVWYkhSeVlWZHBia1J2WTJzdVJHOWphMkZpYkdWRGIyNTBjbTlzVUdGdVpRSUFBQUFDQUFBQUFnQUFBQWtZQUFBQUNSa0FBQUFGR0FBQUFERkpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTVFYjJOcllXSnNaVU52Ym5SeWIyeFFZVzVsQ2dBQUFBaFRaWFIwYVc1bmN3UlVaWGgwQkZOcGVtVUNTV1FPUkc5amEyVmtVR0Z5Wlc1MFNXUVFSbXh2WVhScGJtZFFZWEpsYm5SSlpBTkxaWGtMUTI5dWRISnZiRTVoYldVVlQzSnBaMmx1WVd4RGIyNTBjbTlzUW05MWJtUnpFRU52Ym5SeWIyeFFZVzVsU1c1a1pYZ0VBUVFEQXdNQkFRUUFLa2x1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNUViMk5yTGxCaGJtVlRaWFIwYVc1bmN3SUFBQUFUVTNsemRHVnRMa1J5WVhkcGJtY3VVMmw2WlJJQUFBQUxVM2x6ZEdWdExrZDFhV1FMVTNsemRHVnRMa2QxYVdRTFUzbHpkR1Z0TGtkMWFXUVlVM2x6ZEdWdExrUnlZWGRwYm1jdVVtVmpkR0Z1WjJ4bEVnQUFBQWdDQUFBQUNSb0FBQUFHR3dBQUFCQkVhV0ZuY21GdElFVjRjR3h2Y21WeUFlVC8vLy90Ly8vL3pnQUFBSGNCQUFBQjQvLy8vKy16Ly8vOGJ4VistbU1OS3RSSTRCNDM1c3dKSm5BZUwvLy8vcy8vLy9kNkoyeW9WSmdVYWtxZldrTHcxYTFnSGgvLy8vN1AvLy93QUFBQUFBQUFBQUFBQUFBQUFBQUFBR0lBQUFBQk5FYVdGbmNtRnRSWGh3Ykc5eVpYSlFZVzVsQmlFQUFBQVFiVVJwWVdkeVlXMUZlSEJzYjNKbGNnWGUvLy8vR0ZONWMzUmxiUzVFY21GM2FXNW5MbEpsWTNSaGJtZHNaUVFBQUFBQmVBRjVCWGRwWkhSb0JtaGxhV2RvZEFBQUFBQUlDQWdJRWdBQUFFQUFBQURJQUFBQWVRQUFBR0VBQUFBQUFBQUFBUmtBQUFBWUFBQUFDU01BQUFBR0pBQUFBQk5EYkdGemMybG1hV1Z5SUVWNGNHeHZjbVZ5QWR2Ly8vL3QvLy8vemdBQUFIY0JBQUFCMnYvLy8rLXovLy85MjJkeWk4SU0yU3JLbnJud1M0cmdZQWRuLy8vL3MvLy8vZDZKMnlvVkpnVWFrcWZXa0x3MWExZ0hZLy8vLzdQLy8vd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUdLUUFBQUJaRGJHRnpjMmxtYVdWeVJYaHdiRzl5WlhKUVlXNWxCaW9BQUFBVGJVTnNZWE56YVdacFpYSkZlSEJzYjNKbGNnSFYvLy8vM3YvLy83Z0JBQUNvQUFBQWVRQUFBR0VBQUFBQkFBQUFEQ3dBQUFCZlNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1Mk5TNHlMQ0JXWlhKemFXOXVQVFV1TWk0eU1EQTFNaTR4TURNNUxDQkRkV3gwZFhKbFBXNWxkWFJ5WVd3c0lGQjFZbXhwWTB0bGVWUnZhMlZ1UFRka1pEVmpNekUyTTJZeVkyUXdZMklGR2dBQUFDcEpibVp5WVdkcGMzUnBZM011VjJsdUxsVnNkSEpoVjJsdVJHOWpheTVRWVc1bFUyVjBkR2x1WjNNQkFBQUFEVlJoWWtGd2NHVmhjbUZ1WTJVRUlVbHVabkpoWjJsemRHbGpjeTVYYVc0dVFYQndaV0Z5WVc1alpVaHZiR1JsY2l3QUFBQUNBQUFBQ1MwQUFBQUJJd0FBQUJvQUFBQUpMZ0FBQUFVdEFBQUFJVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVRWEJ3WldGeVlXNWpaVWh2YkdSbGNnRUFBQUFLUVhCd1pXRnlZVzVqWlFRYlNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1QmNIQmxZWEpoYm1ObExBQUFBQ3dBQUFBSkx3QUFBQUV1QUFBQUxRQUFBQWt3QUFBQURERUFBQUJpU1c1bWNtRm5hWE4wYVdOekxsTm9ZWEpsWkM1Mk5TNHlMQ0JXWlhKemFXOXVQVFV1TWk0eU1EQTFNaTR4TURNNUxDQkRkV3gwZFhKbFBXNWxkWFJ5WVd3c0lGQjFZbXhwWTB0bGVWUnZhMlZ1UFRka1pEVmpNekUyTTJZeVkyUXdZMklGTHdBQUFCdEpibVp5WVdkcGMzUnBZM011VjJsdUxrRndjR1ZoY21GdVkyVUNBQUFBQlVsdFlXZGxBa2xrQkFBdlNXNW1jbUZuYVhOMGFXTnpMbE5vWVhKbFpDNVRaWEpwWVd4cGVtRjBhVzl1TGs5aWFtVmpkRmR5WVhCd1pYSXhBQUFBQ0N3QUFBQUZ6di8vL3k5SmJtWnlZV2RwYzNScFkzTXVVMmhoY21Wa0xsTmxjbWxoYkdsNllYUnBiMjR1VDJKcVpXTjBWM0poY0hCbGNnRUFBQUFMYjJKcVpXTjBWbUZzZFdVRUZWTjVjM1JsYlM1RWNtRjNhVzVuTGtKcGRHMWhjQklBQUFBeEFBQUFDVE1BQUFBQUFBQUFBVEFBQUFBdkFBQUFBY3ovLy8vTy8vLy9DVFVBQUFBQUFBQUFCVE1BQUFBVlUzbHpkR1Z0TGtSeVlYZHBibWN1UW1sMGJXRndBUUFBQUFSRVlYUmhCd0lTQUFBQUNUWUFBQUFCTlFBQUFETUFBQUFKTndBQUFBODJBQUFBQXdFQUFBS0pVRTVIRFFvYUNnQUFBQTFKU0VSU0FBQUFFQUFBQUJBSUJnQUFBQi96LzJFQUFBQUVaMEZOUVFBQXNZOEwvR0VGQUFBQUlHTklVazBBQUhvbUFBQ0FoQUFBKy1nQUFBSURvQUFCMU1BQUE2bUFBQURxWUFBQVhjSnk2VVR3QUFBQUpjRWhaY3dBQUVFd0FBQkJNQWJYTDR3UUFBQUI1U1VSQlZEaFB4WkJiRm9BZ0NFUlpla3RqWndZS0JqNkkvT2w2cGtERzhSUUFYT1ZjbGRVZ0t3SVJ5d2w4emdWUU9TbGlHVUNQTGh2QTlVWnhBTS9rcGpLdDVzbDlRdTNIMVR6Ky1KOXJhSXVhVmNnRVc5ZkI3RzBEYms1VFhBQmxROTRoN25hbGZmRDVBNFFPalJzS0FERDJBY0RkOTFPOEEzQVB1R3RYS0ZKR3BBQUFBQUVsRlRrU3VRbUNDRHpjQUFBQXFBUUFBQW9sUVRrY05DaG9LQUFBQURVbElSRklBQUFBU0FBQUFFQWdHQUFBQUd3WXZYQUFBQUFSblFVMUJBQUN4and2OFlRVUFBQUFnWTBoU1RRQUFlaVlBQUlDRUFBRDZBQUFBZ09nQUFIVXdBQURxWUFBQU9wZ0FBQmR3bkxwUlBBQUFBQWx3U0ZsekFBQVFUQUFBRUV3QnRjdmpCQUFBQUtCSlJFRlVPRSstdGtna094Q0FNQTNsNm5zYlBXcnNPUndPbGh6cVNPVUlZVWUybWhtM2ZjMkxXOERRZE9lY3Rnckt2cnVFOUdad29Rb25qVXNhenBRaGJqalhhbjJITjlGbHpFWlljYTh3VTFRWFhsTmd4Nnd3Ui9rUzIxYnlXa1BpaVhzS3pQcXdWaWU4YkxCU3dIVjVDWWc5WmlnaEt2bXJFSG5Jcm10SDM0TW94ZnhiNVJmMGNtQWNSVU1PVFVHTDREekdxdmVZWFNlRVhTU0ZJVXRvQistU3NYWVhESUxib0FBQUFBU1VWT1JLNUNZSUlMC1ZhbGlkQm91bmRzAAABCExvY2F0aW9uEwCCAAAAggAAAApDdXN0b21EYXRhGgAaAwtXaW5kb3dTdGF0ZQoAAgAAAAZGb3JtSWQKAAAAAAAPQ2hpbGRMYXlvdXREYXRhGgAaAQQAIwAAGgEBACQAABoDADoEJQABAgAAAAIAADoEJgABAgABAAIADgUnAA9UYWJiZWRNZGlMYXlvdXQaAQIAKAAADgInAAAOAAAAAA4FKQD1FUFBRUFBQUQvLy8vL0FRQUFBQUFBQUFBTUFnQUFBQ0pKYm1aeVlXZHBjM1JwWTNNdVYybHVMbFZzZEhKaFYybHVWR0ZpWW1Wa1RXUnBEQU1BQUFCeFNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmxSaFltSmxaRTFrYVM1Mk5TNHlMQ0JXWlhKemFXOXVQVFV1TWk0eU1EQTFNaTR4TURNNUxDQkRkV3gwZFhKbFBXNWxkWFJ5WVd3c0lGQjFZbXhwWTB0bGVWUnZhMlZ1UFRka1pEVmpNekUyTTJZeVkyUXdZMklGQVFBQUFEQkpibVp5WVdkcGMzUnBZM011VTJoaGNtVmtMbE5sY21saGJHbDZZWFJwYjI0dVQySnFaV04wVTNSeVpXRnRaWElHQUFBQUdrOWlhbVZqZEZOMGNtVmhiV1Z5UVhOelpXMWliSGxPWVcxbEMxUmhZbE5sZEhScGJtZHpDVlJoWWtkeWIzVndjeE5CWTNScGRtVlVZV0pIY205MWNFbHVaR1Y0Q1ZacFpYZFRkSGxzWlJCVVlXSkhjbTkxY0ZObGRIUnBibWR6QVFRRUFBQUVNVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNVVZV0ppWldSTlpHa3VUV1JwVkdGaVUyVjBkR2x1WjNNREFBQUFPVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVWV3gwY21GWGFXNVVZV0ppWldSTlpHa3VUV1JwVkdGaVIzSnZkWEJ6UTI5c2JHVmpkR2x2YmdNQUFBQUlDRFpKYm1aeVlXZHBjM1JwWTNNdVYybHVMbFZzZEhKaFYybHVWR0ZpWW1Wa1RXUnBMazFrYVZSaFlrZHliM1Z3VTJWMGRHbHVaM01EQUFBQUFnQUFBQVlFQUFBQUlrbHVabkpoWjJsemRHbGpjeTVYYVc0dVZXeDBjbUZYYVc1VVlXSmlaV1JOWkdrSkJRQUFBQWtHQUFBQUFBQUFBQUlBQUFBSkJ3QUFBQXdJQUFBQVgwbHVabkpoWjJsemRHbGpjeTVYYVc0dWRqVXVNaXdnVm1WeWMybHZiajAxTGpJdU1qQXdOVEl1TVRBek9Td2dRM1ZzZEhWeVpUMXVaWFYwY21Gc0xDQlFkV0pzYVdOTFpYbFViMnRsYmowM1pHUTFZek14TmpObU1tTmtNR05pQlFVQUFBQXhTVzVtY21GbmFYTjBhV056TGxkcGJpNVZiSFJ5WVZkcGJsUmhZbUpsWkUxa2FTNU5aR2xVWVdKVFpYUjBhVzVuY3dJQUFBQVRRV04wYVhabFZHRmlRWEJ3WldGeVlXNWpaUlZUWld4bFkzUmxaRlJoWWtGd2NHVmhjbUZ1WTJVRUJDRkpibVp5WVdkcGMzUnBZM011VjJsdUxrRndjR1ZoY21GdVkyVkliMnhrWlhJSUFBQUFJVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVRWEJ3WldGeVlXNWpaVWh2YkdSbGNnZ0FBQUFEQUFBQUNRa0FBQUFKQ2dBQUFBVUdBQUFBT1VsdVpuSmhaMmx6ZEdsamN5NVhhVzR1Vld4MGNtRlhhVzVVWVdKaVpXUk5aR2t1VFdScFZHRmlSM0p2ZFhCelEyOXNiR1ZqZEdsdmJnSUFBQUFGUTI5MWJuUUJNQUFFQ0M1SmJtWnlZV2RwYzNScFkzTXVWMmx1TGxWc2RISmhWMmx1VkdGaVltVmtUV1JwTGsxa2FWUmhZa2R5YjNWd0F3QUFBQU1BQUFBQkFBQUFDUXNBQUFBRkJ3QUFBRFpKYm1aeVlXZHBjM1JwWTNNdVYybHVMbFZzZEhKaFYybHVWR0ZpWW1Wa1RXUnBMazFrYVZSaFlrZHliM1Z3VTJWMGRHbHVaM01CQUFBQUNGUmhZbE4wZVd4bEFBZ0RBQUFBQ1FBQUFBVUpBQUFBSVVsdVpuSmhaMmx6ZEdsamN5NVhhVzR1UVhCd1pXRnlZVzVqWlVodmJHUmxjZ0VBQUFBS1FYQndaV0Z5WVc1alpRUWJTVzVtY21GbmFYTjBhV056TGxkcGJpNUJjSEJsWVhKaGJtTmxDQUFBQUFnQUFBQUpEQUFBQUFFS0FBQUFDUUFBQUFrTkFBQUFCUXNBQUFBdVNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmxSaFltSmxaRTFrYVM1TlpHbFVZV0pIY205MWNBUUFBQUFFVkdGaWN3WkZlSFJsYm5RVVJtbHljM1JFYVhOd2JHRjVWR0ZpU1c1a1pYZ1FVMlZzWldOMFpXUlVZV0pKYm1SbGVBUUFBQUEwU1c1bWNtRm5hWE4wYVdOekxsZHBiaTVWYkhSeVlWZHBibFJoWW1KbFpFMWthUzVOWkdsVVlXSnpRMjlzYkdWamRHbHZiZ01BQUFBSUNBZ0RBQUFBQ1E0QUFBQUtBd0FBQUFBQUFBQUFBQUFGREFBQUFCdEpibVp5WVdkcGMzUnBZM011VjJsdUxrRndjR1ZoY21GdVkyVUNBQUFBQ0VadmJuUkVZWFJoQWtsa0JBQVpTVzVtY21GbmFYTjBhV056TGxkcGJpNUdiMjUwUkdGMFlRZ0FBQUFJQ0FBQUFBa1BBQUFBQUFBQUFBRU5BQUFBREFBQUFBa1FBQUFBQUFBQUFBVU9BQUFBTkVsdVpuSmhaMmx6ZEdsamN5NVhhVzR1Vld4MGNtRlhhVzVVWVdKaVpXUk5aR2t1VFdScFZHRmljME52Ykd4bFkzUnBiMjRDQUFBQUJVTnZkVzUwQVRBQUJBZ3BTVzVtY21GbmFYTjBhV056TGxkcGJpNVZiSFJ5WVZkcGJsUmhZbUpsWkUxa2FTNU5aR2xVWVdJREFBQUFBd0FBQUFFQUFBQUpFUUFBQUFVUEFBQUFHVWx1Wm5KaFoybHpkR2xqY3k1WGFXNHVSbTl1ZEVSaGRHRUJBQUFBQkVKdmJHUUFDQWdBQUFBQkFBQUFBUkFBQUFBUEFBQUFBUUFBQUF3U0FBQUFZa2x1Wm5KaFoybHpkR2xqY3k1VGFHRnlaV1F1ZGpVdU1pd2dWbVZ5YzJsdmJqMDFMakl1TWpBd05USXVNVEF6T1N3Z1EzVnNkSFZ5WlQxdVpYVjBjbUZzTENCUWRXSnNhV05MWlhsVWIydGxiajAzWkdRMVl6TXhOak5tTW1Oa01HTmlCUkVBQUFBcFNXNW1jbUZuYVhOMGFXTnpMbGRwYmk1VmJIUnlZVmRwYmxSaFltSmxaRTFrYVM1TlpHbFVZV0lCQUFBQURWQmxjbk5wYzNSbFpFbHVabThFTDBsdVpuSmhaMmx6ZEdsamN5NVRhR0Z5WldRdVUyVnlhV0ZzYVhwaGRHbHZiaTVQWW1wbFkzUlhjbUZ3Y0dWeUVnQUFBQU1BQUFBRjdmLy8veTlKYm1aeVlXZHBjM1JwWTNNdVUyaGhjbVZrTGxObGNtbGhiR2w2WVhScGIyNHVUMkpxWldOMFYzSmhjSEJsY2dFQUFBQUxiMkpxWldOMFZtRnNkV1VDRWdBQUFBa1VBQUFBRHhRQUFBQlBBQUFBQWhvQUFRRFJpVWdWbzErLWRRb2gyRmdlSDRCYk1BQUFBQXdBTFEyOXVkR0ZwYm1WeVNXUWFCRVJoZEdFYUNFbHpRV04wYVhabEFBRUFBQWdpTU5HL256bEdRWVJ3Zldhbkc3ZDJBQm9EQUFFTAA6BCoAAQIAAAACAAA6BCsAAQIAAAACAA==</Preferences>
+  <AppearanceStyleManager Type="AppearanceStyleManager">
+    <Styles />
+    <Themes />
+    <DefaultTheme Type="AppearanceStyle">
+      <StyleId>00000000-0000-0000-0000-000000000000</StyleId>
+      <Name />
+      <Appearances Type="AppearanceManager">
+        <Entries />
+      </Appearances>
+    </DefaultTheme>
+  </AppearanceStyleManager>
+</SDBSystem>

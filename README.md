@@ -1,19 +1,27 @@
 # LoRaWAN to RS232 Bridge
 
-This program connects a [Microchip RN2903](https://www.microchip.com/en-us/product/RN2903)-based LoRaWAN device to one or more local serial ports, allowing a crude form of remote control for things like network routers (our initial use case with [NYC Mesh](https://www.nycmesh.net)).
+The `bridge` program connects a [Microchip RN2903](https://www.microchip.com/en-us/product/RN2903)-based LoRaWAN device to one or more local serial ports, allowing low bandwidth remote monitoring and control of things like network routers (our initial use case with [NYC Mesh](https://www.nycmesh.net)).
 
-This program currently is very much coded to the command set used by the RN2903, and so it's not directly useable with other adapters. However, it should not be difficult to adapt.
+`bridge` uses the command set used by the RN2903, and so it's not directly useable with other adapters. However, all the specifics are isolated in a radio driver with an abstract interface, so it should not be difficult to adapt this code to work with other radios.
 
-It's been tested with the [NYC-duino](https://github.com/things-nyc/nyc-duino) and the [Microchip RN2903 Mote](https://www.microchip.com/en-us/development-tool/DM164139).
+`bridge` been tested with the [NYC-duino](https://github.com/things-nyc/nyc-duino) and the [Microchip RN2903 Mote](https://www.microchip.com/en-us/development-tool/DM164139).
 
-Here's a picture of the intended use case:
+Here's a diagram of the intended use case:
 
 <!-- see deployment.puml for the source code, or decode the URL -->
 ![UML Deployment Diagram](https://www.plantuml.com/plantuml/svg/VPDHRzCm4CVV_IbEtSkGQ5W3Um0Xj55UG115eHCFOmzkV6sifRPrTbhrs-EBPzR0LAbgOz_lV__BtVN61qbXsFL2ji4It7aaqTgTimPDW5czd87qK2zFBx_RHlwwhQ2HIjin_iC6F2KQwTqQYOvGwz_cykxdP-Yi3wzIClsCHiFr0ku5G6JcmSwRR--kusbfpHuf8C75GZnC-V8yN_xBL-VvQiBF6Ziasx7MT5gy19GdGFaIK9q0bJ1M8SnM7SAgqsRheS9miFGuGgjL9ThU3YetDsbpeo_yut7T3vYPDMcrnS8TuJ9qseCZkoMvI-rDGRZOsbvbmU2Hvj8v1iOPtphtH0W-mlmJpxXUGa6wA3B25tDbOp0M21_Wgmb81eFWuySnaciKwJTVfuqG_9rkeDOnGHo2C7pNuoQ0tIGCk2KUuaSQQAho_TLREEZGmNvHN5t3HjFk80bZL4LMvb5w92rxa4gwW5G8D0hCQ1kzqdkaNeYfPwr7HumFx1dYKrxGr-p1xTnhXHwSFI15EDYHuc8PoEUJbNfoyiLJQaba3nwqKRgLKQKqOHkqDLn0JikfsFMDmhrk4GXxoOplj2lWYmmIDdrC4z6r_fj1zlrn-h9fHkclb7hCZtaIQG4vmeNovfkOoD94M3uBowcmF2-ideNLL5Zz9qnb5VUTLWhDGzgqQ9XSYtnceVHW41KgSOD63Rl-3m00)
 
 ## Modem and Modem Setup
 
-The RN2903 is configured in Class C mode using `mac set class c`. If the RN2903 is not yet joined (based on `devaddr` being `0`), the channel mask is set to 8~15/65, and then `mac join` is issued.
+LoRaWAN modems generally have significatn stored state. During startup, `bridge` queries the state of the modem and tries to ensure that it's in the proper state:
+
+| Desired state | Action taken to enforce |
+|---------------|-------------------------|
+| Not administratively silenced | Turn off the administrative-silence state.
+| Class C operations enabled | Set MAC to class C. |
+| Already joined to the network. | Set up the network channel mask, and then join.
+
+During initialization, The RN2903 is configured in Class C mode using `mac set class c`. If the RN2903 is not yet joined (based on `devaddr` being `0`), the channel mask is set to 8~15/65, and then `mac join` is issued.
 
 ## Program flow
 

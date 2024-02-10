@@ -653,7 +653,7 @@ class Rn2903():
 
     def write(self, port, buf):
         """ send the characters in buf to port; unconfirmed """
-        b = [ b'mac', b'tx', b'uncnf', b"%d" % port, binascii.hexlify(buf) ].join(b' ')
-        self.log.debug("queue uplink command: %s", str(b), encoding='ascii')
+        b = b' '.join([ b'mac', b'tx', b'uncnf', b"%d" % port, binascii.hexlify(buf) ])
+        self.log.debug("queue uplink command: %s", str(b, encoding='ascii'))
         self.macll_send_command_indication(b)
 

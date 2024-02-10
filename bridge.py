@@ -115,7 +115,7 @@ class App():
         # do required init
         if need_set:
             if macclass != "C":
-                self.radio.mac_set_class("C")
+                self.radio.mac_set_class(b"C")
             diff_mask = desired_mask ^ mask
             for iChannel in range(72):
                 iChannel_bit = int(1) << iChannel

@@ -103,6 +103,7 @@ class App():
 
         if (not need_set) and not macstatus.need_join():
             self.log.info("Already joined as class C, assume radio state is corect")
+            self.send_dummy_line()
             return
 
         desired_mask = (int(1) << 65) | (int(0xFF) << 8)
@@ -114,7 +115,7 @@ class App():
         # do required init
         if need_set:
             if macclass != "C":
-                self.radio.mac_set_class("C")
+                self.radio.mac_set_class(b"C")
             diff_mask = desired_mask ^ mask
             for iChannel in range(72):
                 iChannel_bit = int(1) << iChannel
@@ -127,6 +128,14 @@ class App():
             self.log.info("joining...")
             self.radio.mac_join(b"otaa")
             self.log.info("join accepted")
+        self.send_dummy_line()
+
+    def send_dummy_line(self):
+        # send a dummy msg to ensure Class C works
+        # ref: https://www.thethingsindustries.com/docs/devices/configuring-devices/class-c/#enabling-and-disabling-class-c
+        self.log.info("Sending dummy msg to port 42")
+        self.radio.write(42, b"\xff")
+        self.log.info("Dummy msg sent")
 
 def main():
     global gApp

@@ -20,6 +20,7 @@ LoRaWAN modems generally have significant stored state. During startup, `bridge`
 | Not administratively silenced | Turn off the administrative-silence state.
 | Class C operations enabled | Set MAC to class C. |
 | Already joined to the network. | Set up the network channel mask, and then join.
+| A class A uplink has been sent (to cause The Things Stack to enable Class C) | Send a dummy message to port 42.
 
 During initialization, The RN2903 is configured in Class C mode using `mac set class c`. If the RN2903 is not yet joined (based on `devaddr` being `0`), the channel mask is set to 8~15/65, and then `mac join` is issued.
 
